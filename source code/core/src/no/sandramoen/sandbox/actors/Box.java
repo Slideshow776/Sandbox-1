@@ -3,6 +3,7 @@ package no.sandramoen.sandbox.actors;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.utils.Align;
 
 import no.sandramoen.sandbox.actors.utils.BaseActor;
 
@@ -12,7 +13,7 @@ public class Box extends BaseActor {
         super(x, y, stage);
 
         loadImage("whitePixel");
-        setColor(Color.RED);
+        setColor(Color.GREEN);
         setSize(12.5f, 12.5f);
         centerAtPosition(x, y);
 

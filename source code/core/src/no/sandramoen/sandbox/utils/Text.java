@@ -2,6 +2,12 @@ package no.sandramoen.sandbox.utils;
 
 import com.badlogic.gdx.files.FileHandle;
 
+/*
+ * "Load a simple text file through asset manager in libgdx"
+ *
+ * Copied from @author: RegisteredUser
+ * https://gamedev.stackexchange.com/questions/101326/load-a-simple-text-file-through-asset-manager-in-libgdx
+ * */
 public class Text {
 
     private String string;

@@ -2,7 +2,9 @@ package no.sandramoen.sandbox.utils;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Event;
@@ -75,6 +77,19 @@ public class GameUtils {
         if (!shaderProgram.isCompiled())
             Gdx.app.error(GameUtils.class.getSimpleName(), "Error: Couldn't compile shader => " + shaderProgram.getLog());
         return shaderProgram;
+    }
+
+    public static Color randomLightColor() {
+        float r = 0f;
+        float g = 0f;
+        float b = 0f;
+        while (r <= 0 && g <= 0 && b <= 0) {
+            r = MathUtils.random(0f, 1f);
+            g = MathUtils.random(0f, 1f);
+            b = MathUtils.random(0f, 1f);
+        }
+
+        return new Color(r, g, b, 1);
     }
 
     public static void printLoadingTime(String tag, String message, long startTime) {

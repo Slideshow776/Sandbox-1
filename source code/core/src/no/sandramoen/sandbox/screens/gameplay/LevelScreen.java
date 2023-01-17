@@ -3,81 +3,71 @@ package no.sandramoen.sandbox.screens.gameplay;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.math.EarClippingTriangulator;
 
 import no.sandramoen.sandbox.actors.Box;
 import no.sandramoen.sandbox.actors.Fish;
 import no.sandramoen.sandbox.utils.BaseGame;
 import no.sandramoen.sandbox.utils.GameUtils;
+import no.sandramoen.sandbox.utils.Triangulation;
+
+import com.badlogic.gdx.utils.ShortArray;
+import com.github.tommyettinger.textra.TypingLabel;
 
 public class LevelScreen extends no.sandramoen.sandbox.utils.BaseScreen {
-    private Box startBox;
-    private Box endBox;
-    private Array<Box> boxes;
-    private Array<Polyline> polylines;
+    private Array<Box> shapeOfBoxes;
+    private Array<Polyline> polyLines;
+    private Array<Polyline> closedShape;
+    private boolean isEndDraw;
 
     private Vector2 touchDownPoint;
-    private float drawTime = -1;
-    private final float MAX_DRAW_TIME = 20;
+    private final int MAX_POLY_LINES = 400;
+    private final float DISTANCE = Gdx.graphics.getWidth() * .01f;
 
     private Fish fish;
 
+    private TypingLabel staminaLabel;
+
+    private Array<Polygon> triangles;
+
     @Override
     public void initialize() {
-        boxes = new Array();
-        polylines = new Array();
+        shapeOfBoxes = new Array();
+        polyLines = new Array();
         touchDownPoint = new Vector2();
 
-        fish = new Fish(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .5f, mainStage);
+        /*fish = new Fish(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .5f, mainStage);*/
+
+        staminaLabel = new TypingLabel(MAX_POLY_LINES + "", new Label.LabelStyle(BaseGame.mySkin.get("arcade26", BitmapFont.class), null));
+        uiTable.add(staminaLabel).expandY().top().padTop(Gdx.graphics.getHeight() * .02f);
+
+        /*triangulationTest();*/
     }
 
     @Override
     public void update(float delta) {
-        if (drawTime >= 0 && drawTime <= MAX_DRAW_TIME)
-            drawTime += delta;
-/*
-        System.out.println(drawTime);*/
     }
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        drawTime = 0;
-
+        isEndDraw = false;
         Vector3 worldCoordinates = mainStage.getCamera().unproject(new Vector3(screenX, screenY, 0f));
         touchDownPoint.x = worldCoordinates.x;
         touchDownPoint.y = worldCoordinates.y;
-
-        startBox = new Box(worldCoordinates.x, worldCoordinates.y, mainStage);
-        startBox.setColor(Color.CYAN);
         return super.touchDown(screenX, screenY, pointer, button);
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        drawTime = -1;
-        drawPolyLinesStartingPosition();
-
-        for (Box box : boxes)
-            box.fadeAndRemove();
-        boxes.clear();
-        polylines.clear();
-
-        touchDownPoint.x = 0;
-        touchDownPoint.y = 0;
-
-        Vector3 worldCoordinates = mainStage.getCamera().unproject(new Vector3(screenX, screenY, 0f));
-        endBox = new Box(worldCoordinates.x, worldCoordinates.y, mainStage);
-        endBox.setColor(Color.YELLOW);
-
-        startBox.fadeAndRemove();
-        endBox.fadeAndRemove();
-
-        System.out.println("\nresetting\n");
-
+        endTurn();
         return super.touchUp(screenX, screenY, pointer, button);
     }
 
@@ -85,10 +75,11 @@ public class LevelScreen extends no.sandramoen.sandbox.utils.BaseScreen {
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         Vector3 worldCoordinates = mainStage.getCamera().unproject(new Vector3(screenX, screenY, 0f));
 
-        if (drawTime <= MAX_DRAW_TIME && drawTime >= 0 && isEnoughDistance(worldCoordinates)) {
+        if (!isEndDraw && polyLines.size < MAX_POLY_LINES && isTouchDraggedEnoughDistance(worldCoordinates)) {
             addPolyLine(worldCoordinates);
-            drawPolyLine();
-            checkIfPolyLinesIsAClosedShape();
+            shapeOfBoxes.add(drawPolyLine(polyLines.peek(), Color.RED, 1f));
+            staminaLabel.setText(String.valueOf(MAX_POLY_LINES - polyLines.size));
+            checkIfClosedShape();
         }
         return super.touchDragged(screenX, screenY, pointer);
     }
@@ -99,80 +90,155 @@ public class LevelScreen extends no.sandramoen.sandbox.utils.BaseScreen {
             Gdx.app.exit();
         else if (keycode == Keys.R)
             BaseGame.setActiveScreen(new LevelScreen());
+        else if (keycode == Keys.T)
+            triangulateShape(closedShape);
         return super.keyDown(keycode);
     }
 
-    private boolean isEnoughDistance(Vector3 worldCoordinates) {
-        final float DISTANCE = Gdx.graphics.getWidth() * .05f;
-        if (polylines.size == 0) {
+    private boolean isTouchDraggedEnoughDistance(Vector3 worldCoordinates) {
+        if (polyLines.size == 0) {
             if (GameUtils.isDistanceBigEnough(
                     new Vector2(touchDownPoint.x, touchDownPoint.y),
                     new Vector2(worldCoordinates.x, worldCoordinates.y),
                     DISTANCE
             ))
                 return true;
-        } else if (polylines.size > 0) {
+        } else if (polyLines.size > 0) {
             if (GameUtils.isDistanceBigEnough(
-                    new Vector2(polylines.get(polylines.size - 1).getX(), polylines.get(polylines.size - 1).getY()),
+                    new Vector2(polyLines.get(polyLines.size - 1).getX(), polyLines.get(polyLines.size - 1).getY()),
                     new Vector2(worldCoordinates.x, worldCoordinates.y),
                     DISTANCE
             ))
                 return true;
         } else {
-            Gdx.app.error(getClass().getSimpleName(), "idk what happened trying to draw a PolyLine (size: " + polylines.size + " )...");
+            Gdx.app.error(getClass().getSimpleName(), "idk what happened trying to draw a PolyLine (size: " + polyLines.size + " )...");
         }
 
         return false;
     }
 
-    private void checkIfPolyLinesIsAClosedShape() {
-        if (boxes.size > 2) {
-            for (int i = 0; i < boxes.size - 1; i++) {
-                if (boxes.get(boxes.size - 1) == boxes.get(i) || boxes.get(boxes.size - 2) == boxes.get(i)) {
+    private void checkIfClosedShape() {
+        if (shapeOfBoxes.size > 2) {
+            for (int i = 0; i < shapeOfBoxes.size - 1; i++) {
+                if (shapeOfBoxes.get(shapeOfBoxes.size - 1) == shapeOfBoxes.get(i) || shapeOfBoxes.get(shapeOfBoxes.size - 2) == shapeOfBoxes.get(i)) {
                     continue;
-                } else if (boxes.get(boxes.size - 1).overlaps(boxes.get(i))) {
-                    drawTime = -1;
+                } else if (shapeOfBoxes.get(shapeOfBoxes.size - 1).overlaps(shapeOfBoxes.get(i))) {
+                    // get closed shape
+                    closedShape = new Array();
+                    for (int j = 0; j < polyLines.size - i - 1; j++)
+                        closedShape.add(polyLines.get(i + j));
+
+                    // bridge the gap of the closed shape
+                    Polyline polyline = new Polyline(new float[]{
+                            closedShape.peek().getX(),
+                            closedShape.peek().getY(),
+                            closedShape.first().getOriginX(),
+                            closedShape.first().getOriginY(),
+                    });
+                    polyline.setOrigin(closedShape.peek().getX(), closedShape.peek().getY());
+                    polyline.setPosition(closedShape.first().getOriginX(), closedShape.first().getOriginY());
+                    closedShape.add(polyline);
+
+                    // draw shape to be triangulated
+                    drawPolyLine(closedShape.first(), Color.CYAN, 1);
+                    drawPolyLine(closedShape.peek(), Color.CYAN, 1).setOpacity(.5f);
+                    for (int j = 1; j < closedShape.size - 1; j++)
+                        drawPolyLine(closedShape.get(j), Color.BLUE, 1);
+
+                    System.out.println("Will crash?: " + (getPolyLineAngle(closedShape.peek()) < 90) + ", rotation: " + getPolyLineAngle(closedShape.peek()));
+
+                    // EarClippingTriangulator.compute
+
+                    //TODO: 1) konverter alt til float[] og mat inn i triangulatoren
+                    float[] touchPoints = new float[closedShape.size * 2];
+                    for (int j = 0; j < closedShape.size - 1; j++) {
+                        touchPoints[j] = closedShape.get(j).getOriginX();
+                        touchPoints[j + 1] = closedShape.get(j + 1).getOriginY();
+                    }
+                    EarClippingTriangulator triangulator = new EarClippingTriangulator();
+                    ShortArray triangles = triangulator.computeTriangles(touchPoints);
+
+                    for (int j = 0; j < triangles.size; j++) {
+                        System.out.println(triangles.get(j));
+                    }
+
+                    // 1st triangle
+                    for (int j = 0; j < triangles.size; j+=3) {
+                        Polygon triangle = new Polygon(new float[]{
+                                closedShape.get(triangles.get(j + 0)).getOriginX(),
+                                closedShape.get(triangles.get(j + 0)).getOriginY(),
+                                closedShape.get(triangles.get(j + 1)).getOriginX(),
+                                closedShape.get(triangles.get(j + 1)).getOriginY(),
+                                closedShape.get(triangles.get(j + 2)).getOriginX(),
+                                closedShape.get(triangles.get(j + 2)).getOriginY()
+                        });
+                        drawTriangle(triangle);
+                    }
+
+                    //TODO: 2) tegn triangulatoren
+
+                    // TODO: triangulate here?
+                    // triangulateShape(closedShape);
+
+                    endTurn();
                     break;
                 }
-
             }
         }
     }
 
-    private void addPolyLine(Vector3 worldCoordinates) {
-        if (polylines.size == 0) {
-            Polyline polyline = new Polyline(new float[]{
-                    touchDownPoint.x,
-                    touchDownPoint.y,
-                    worldCoordinates.x,
-                    worldCoordinates.y
-            });
-            polyline.setOrigin(touchDownPoint.x, touchDownPoint.y);
-            polyline.setPosition(worldCoordinates.x, worldCoordinates.y);
-            polylines.add(polyline);
-        } else if (polylines.size > 0) {
+    private void drawTriangle(Polygon triangle) {
+        Array<Polyline> polyLines = new Array();
+        Color randomColor = GameUtils.randomLightColor();
+        for (int i = 0; i < 6; i += 2) {
             Polyline polyLine = new Polyline(new float[]{
-                    polylines.get(polylines.size - 1).getX(),
-                    polylines.get(polylines.size - 1).getY(),
-                    worldCoordinates.x,
-                    worldCoordinates.y
+                    triangle.getVertices()[(i + 0) % 6],
+                    triangle.getVertices()[(i + 1) % 6],
+                    triangle.getVertices()[(i + 2) % 6],
+                    triangle.getVertices()[(i + 3) % 6]
             });
-            polyLine.setOrigin(polylines.get(polylines.size - 1).getX(), polylines.get(polylines.size - 1).getY());
-            polyLine.setPosition(worldCoordinates.x, worldCoordinates.y);
-            polylines.add(polyLine);
+            polyLine.setOrigin(triangle.getVertices()[(i + 0) % 6], triangle.getVertices()[(i + 1) % 6]);
+            polyLine.setPosition(triangle.getVertices()[(i + 2) % 6], triangle.getVertices()[(i + 3) % 6]);
+            polyLines.add(polyLine);
+        }
+
+        for (Polyline polyline : polyLines)
+            drawPolyLine(polyline, randomColor, 2);
+    }
+
+    private void addPolyLine(Vector3 worldCoordinates) {
+        if (polyLines.size == 0) {
+            Polyline polyline = new Polyline(new float[]{
+                    MathUtils.floor(touchDownPoint.x),
+                    MathUtils.floor(touchDownPoint.y),
+                    MathUtils.floor(worldCoordinates.x),
+                    MathUtils.floor(worldCoordinates.y)
+            });
+            polyline.setOrigin(MathUtils.floor(touchDownPoint.x), MathUtils.floor(touchDownPoint.y));
+            polyline.setPosition(MathUtils.floor(worldCoordinates.x), MathUtils.floor(worldCoordinates.y));
+            polyLines.add(polyline);
+        } else if (polyLines.size > 0) {
+            Polyline polyLine = new Polyline(new float[]{
+                    MathUtils.floor(polyLines.get(polyLines.size - 1).getX()),
+                    MathUtils.floor(polyLines.get(polyLines.size - 1).getY()),
+                    MathUtils.floor(worldCoordinates.x),
+                    MathUtils.floor(worldCoordinates.y)
+            });
+            polyLine.setOrigin(MathUtils.floor(polyLines.get(polyLines.size - 1).getX()), MathUtils.floor(polyLines.get(polyLines.size - 1).getY()));
+            polyLine.setPosition(MathUtils.floor(worldCoordinates.x), MathUtils.floor(worldCoordinates.y));
+            polyLines.add(polyLine);
         } else {
-            Gdx.app.error(getClass().getSimpleName(), "idk what happened trying to draw a polyLine (size: " + polylines.size + " )...");
+            Gdx.app.error(getClass().getSimpleName(), "idk what happened trying to draw a polyLine (size: " + polyLines.size + " )...");
         }
     }
 
-    private void drawPolyLine() {
-        Polyline polyline = polylines.get(polylines.size - 1);
+    private Box drawPolyLine(Polyline polyline, Color color, float height) {
         Box box = new Box(polyline.getOriginX(), polyline.getOriginY(), mainStage);
-        box.setSize(polyline.getLength(), 10);
+        box.setSize(polyline.getLength(), height);
         box.setRotation(getPolyLineAngle(polyline));
         box.setBoundaryRectangle();
-        boxes.add(box);
-        // boxes.add(new Box(worldCoordinates.x, worldCoordinates.y, mainStage));
+        box.setColor(color);
+        return box;
     }
 
     private float getPolyLineAngle(Polyline polyline) {
@@ -195,11 +261,57 @@ public class LevelScreen extends no.sandramoen.sandbox.utils.BaseScreen {
         return angle * MathUtils.radiansToDegrees;
     }
 
-    private void drawPolyLinesStartingPosition() {
-        for (Polyline polyline : polylines) {
-            Box box = new Box(polyline.getX(), polyline.getY(), mainStage);
-            box.setColor(Color.GREEN);
-            box.fadeAndRemove();
+    private void endTurn() {
+        if (!isEndDraw) {
+            isEndDraw = true;
+
+            clearBoxes(shapeOfBoxes);
+            System.out.println("----");
+            polyLines.clear();
+
+            touchDownPoint.x = 0;
+            touchDownPoint.y = 0;
+
+            staminaLabel.setText(String.valueOf(MAX_POLY_LINES));
         }
+    }
+
+    private void clearBoxes(Array<Box> boxes) {
+        /*for (Box box : boxes)
+            box.fadeAndRemove();
+        boxes.clear();*/
+    }
+
+    private void triangulationTest() {
+        /*Array<Vector2> vertices = new Array();
+         *//*vertices.add(new Vector2(-4, 6));
+        vertices.add(new Vector2(0, 2));
+        vertices.add(new Vector2(2, 5));
+        vertices.add(new Vector2(7, 0));
+        vertices.add(new Vector2(5, -6));
+        vertices.add(new Vector2(3, 3));
+        vertices.add(new Vector2(0, -5));
+        vertices.add(new Vector2(-6, 0));
+        vertices.add(new Vector2(-2, 1));*//*
+        vertices.add(new Vector2(0, 0));
+        vertices.add(new Vector2(0, 10));
+        vertices.add(new Vector2(10, 10));
+        vertices.add(new Vector2(10, 0));
+
+        Array<Polygon> trianglePolygons = Triangulation.triangulate(vertices);
+
+        System.out.println("we found " + trianglePolygons.size + " triangles!");
+        for (Polygon polygon : trianglePolygons) {
+            for (float vertex : polygon.getVertices())
+                System.out.println(vertex);
+            System.out.println();
+        }*/
+    }
+
+    private void triangulateShape(Array<Polyline> closedShape) {
+        // TODO: collision detection via triangulation
+        triangles = Triangulation.triangulate(closedShape);
+        for (Polygon triangle : triangles)
+            drawTriangle(triangle);
     }
 }

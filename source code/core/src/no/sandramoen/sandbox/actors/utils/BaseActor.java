@@ -58,8 +58,6 @@ public class BaseActor extends Group {
         deceleration = 0;
 
         boundaryPolygon = null;
-
-        setDebug(true);
     }
 
     @Override
@@ -371,7 +369,9 @@ public class BaseActor extends Group {
     }
 
     public boolean overlaps(BaseActor other) {
-        if (!isCollisionEnabled || !other.isCollisionEnabled) return false;
+        if (!isCollisionEnabled || !other.isCollisionEnabled)
+            return false;
+
         Polygon poly1 = this.getBoundaryPolygon();
         Polygon poly2 = other.getBoundaryPolygon();
 

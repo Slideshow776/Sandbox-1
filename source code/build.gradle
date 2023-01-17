@@ -89,7 +89,7 @@ project(":core") {
         api "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
         api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
         api "com.badlogicgames.ashley:ashley:$ashleyVersion"
-        implementation "com.github.tommyettinger:textratypist:0.7.4"
+        api "com.github.tommyettinger:textratypist:0.7.4"
     }
 
     task packTextures {

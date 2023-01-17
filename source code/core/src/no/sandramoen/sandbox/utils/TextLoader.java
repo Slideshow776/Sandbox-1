@@ -8,6 +8,12 @@ import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 
+/*
+ * "Load a simple text file through asset manager in libgdx"
+ *
+ * Copied from @author: RegisteredUser
+ * https://gamedev.stackexchange.com/questions/101326/load-a-simple-text-file-through-asset-manager-in-libgdx
+ */
 public class TextLoader extends AsynchronousAssetLoader<Text, TextLoader.TextParameter> {
 
     public TextLoader(FileHandleResolver resolver) {
