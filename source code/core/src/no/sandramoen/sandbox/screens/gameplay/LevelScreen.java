@@ -74,7 +74,7 @@ public class LevelScreen extends BaseScreen {
     }
 
     @Override
-    public boolean keyDown(int keycode) {
+    public boolean keyDown(int keycode)  {
         if (keycode == Keys.ESCAPE || keycode == Keys.Q)
             Gdx.app.exit();
         else if (keycode == Keys.R)
@@ -95,6 +95,7 @@ public class LevelScreen extends BaseScreen {
             isPlaying = false;
             shapeDrawer.reset();
             touchDownPoint.set(0, 0);
+            System.out.println();
         }
     }
 
