@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Widget;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Array;
 
 public class GameUtils {
 
@@ -90,6 +91,15 @@ public class GameUtils {
         }
 
         return new Color(r, g, b, 1);
+    }
+
+    public static Object getNextItemOfLoopingArray(Array array, int index) {
+        if (index >= array.size)
+            return array.get(index % array.size);
+        else if (index < 0)
+            return array.get(index % array.size + array.size);
+        else
+            return array.get(index);
     }
 
     public static void printLoadingTime(String tag, String message, long startTime) {

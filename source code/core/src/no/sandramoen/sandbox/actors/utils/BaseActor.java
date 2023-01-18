@@ -58,6 +58,7 @@ public class BaseActor extends Group {
         deceleration = 0;
 
         boundaryPolygon = null;
+        /*setDebug(true);*/
     }
 
     @Override
@@ -112,7 +113,7 @@ public class BaseActor extends Group {
         super.draw(batch, parentAlpha);
     }
 
-    private void setAnimationSize(Float width, Float height) {
+    private void setAnimationSize(float width, float height) {
         animationWidth = width;
         animationHeight = height;
     }
@@ -135,7 +136,7 @@ public class BaseActor extends Group {
         return loadAnimationFromFiles(fileNames, 1f, true);
     }
 
-    private Animation<TextureRegion> loadAnimationFromFiles(Array<String> fileNames, Float frameDuration, Boolean loop) {
+    private Animation<TextureRegion> loadAnimationFromFiles(Array<String> fileNames, float frameDuration, Boolean loop) {
         Array<TextureRegion> textureArray = new Array();
 
         for (int i = 0; i < fileNames.size; i++) {
@@ -246,7 +247,7 @@ public class BaseActor extends Group {
     }
 
     // camera ---------------------------------------------------------------------------------------------------
-    public void zoomCamera(Float zoom) {
+    public void zoomCamera(float zoom) {
         if (this.getStage() != null) {
             OrthographicCamera camera = (OrthographicCamera) this.getStage().getCamera();
             camera.zoom = zoom;
@@ -256,7 +257,7 @@ public class BaseActor extends Group {
         }
     }
 
-    public void alignCamera(Vector2 target, Float lerp) {
+    public void alignCamera(Vector2 target, float lerp) {
         if (this.getStage() != null) {
             OrthographicCamera camera = (OrthographicCamera) this.getStage().getViewport().getCamera();
 
@@ -308,7 +309,7 @@ public class BaseActor extends Group {
         }
     }
 
-    public Boolean searchFocalPoints(Array<Vector2> focalPoints, Vector2 target, Float threshold, Float lerp) {
+    public Boolean searchFocalPoints(Array<Vector2> focalPoints, Vector2 target, float threshold, float lerp) {
         if (this.getStage() != null) {
             OrthographicCamera camera = (OrthographicCamera) this.getStage().getCamera();
             for (Vector2 point : focalPoints) {
@@ -402,7 +403,7 @@ public class BaseActor extends Group {
     }
 
     // miscellaneous -------------------------------------------------------------------------------------------
-    public void centerAtPosition(Float x, Float y) {
+    public void centerAtPosition(float x, float y) {
         setPosition(x - getWidth() / 2, y - getHeight() / 2);
     }
 
@@ -410,7 +411,7 @@ public class BaseActor extends Group {
         centerAtPosition(baseActor.getX() + baseActor.getWidth() / 2, baseActor.getY() + baseActor.getHeight() / 2);
     }
 
-    public void setOpacity(Float opacity) {
+    public void setOpacity(float opacity) {
         this.getColor().a = opacity;
     }
 
