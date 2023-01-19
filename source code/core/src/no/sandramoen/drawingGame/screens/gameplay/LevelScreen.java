@@ -8,13 +8,16 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 
 import no.sandramoen.drawingGame.actors.Fish;
+import no.sandramoen.drawingGame.actors.Player;
 import no.sandramoen.drawingGame.actors.utils.BaseActor;
 import no.sandramoen.drawingGame.ui.StaminaBar;
 import no.sandramoen.drawingGame.utils.BaseGame;
 import no.sandramoen.drawingGame.utils.BaseScreen;
+import no.sandramoen.drawingGame.utils.GameUtils;
 import no.sandramoen.drawingGame.utils.ShapeDrawer;
 
 import com.github.tommyettinger.textra.TypingLabel;
@@ -26,8 +29,11 @@ public class LevelScreen extends BaseScreen {
     private ShapeDrawer shapeDrawer;
 
     private Array<BaseActor> fishes;
+    private Player player;
+    private int numTurns;
 
     private TypingLabel fishLabel;
+    private TypingLabel turnLabel;
     private StaminaBar staminaBar;
 
     @Override
@@ -37,7 +43,8 @@ public class LevelScreen extends BaseScreen {
         shapeDrawer = new ShapeDrawer(mainStage);
 
         fishes = new Array();
-        fishes.add(new Fish(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .5f, mainStage));
+        spawnRandomFish();
+        player = new Player(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .5f, mainStage);
 
         initializeGUI();
     }
@@ -48,9 +55,15 @@ public class LevelScreen extends BaseScreen {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        isPlaying = true;
         Vector3 worldCoordinates = mainStage.getCamera().unproject(new Vector3(screenX, screenY, 0f));
-        touchDownPoint.set(worldCoordinates.x, worldCoordinates.y);
+        if (GameUtils.isWithinDistance(
+                new Vector2(worldCoordinates.x, worldCoordinates.y),
+                new Vector2(player.getX() + player.getWidth() / 2, player.getY() + player.getHeight() / 2),
+                Gdx.graphics.getWidth() * .075f)
+        ) {
+            isPlaying = true;
+            touchDownPoint.set(worldCoordinates.x, worldCoordinates.y);
+        }
         return super.touchDown(screenX, screenY, pointer, button);
     }
 
@@ -66,8 +79,7 @@ public class LevelScreen extends BaseScreen {
         if (isPlaying && shapeDrawer.isItPossibleToDrawNewSegment(touchDownPoint, new Vector2(worldCoordinates.x, worldCoordinates.y))) {
             boolean isClosedShape = shapeDrawer.drawNewLineSegment(touchDownPoint, new Vector2(worldCoordinates.x, worldCoordinates.y));
 
-            float percent = (shapeDrawer.MAX_POLY_LINES - shapeDrawer.polylines.size) / (float) shapeDrawer.MAX_POLY_LINES;
-            staminaBar.decrement(percent);
+            updateStaminaBar();
 
             collisionDetection();
             if (isClosedShape)
@@ -97,28 +109,49 @@ public class LevelScreen extends BaseScreen {
 
     private void endTurn() {
         if (isPlaying) {
-            isPlaying = false;
-            shapeDrawer.reset();
-            touchDownPoint.set(0, 0);
-            staminaBar.reset();
-            if (fishes.isEmpty())
-                fishes.add(new Fish(
-                        MathUtils.random(0, Gdx.graphics.getWidth()),
-                        MathUtils.random(0, Gdx.graphics.getHeight()),
-                        mainStage
-                ));
-            fishLabel.setText(fishes.size + "");
+            player.movePlayer(shapeDrawer.polylines);
+            resetTurn();
         }
+    }
+
+    private void resetTurn() {
+        isPlaying = false;
+        shapeDrawer.reset();
+        touchDownPoint.set(0, 0);
+        staminaBar.reset();
+        spawnRandomFish();
+        fishLabel.setText("Remaining fishes: " + fishes.size);
+        turnLabel.setText("Turns: " + ++numTurns);
+    }
+
+    private void updateStaminaBar() {
+        float percent = (shapeDrawer.MAX_POLY_LINES - shapeDrawer.polylines.size) / (float) shapeDrawer.MAX_POLY_LINES;
+        staminaBar.decrement(percent);
+    }
+
+    private void spawnRandomFish() {
+        if (fishes.isEmpty())
+            fishes.add(new Fish(
+                    MathUtils.random(0, Gdx.graphics.getWidth()),
+                    MathUtils.random(0, Gdx.graphics.getHeight()),
+                    mainStage
+            ));
     }
 
     private void initializeGUI() {
         staminaBar = new StaminaBar(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .98f, uiStage);
 
-        fishLabel = new TypingLabel(fishes.size + "", new Label.LabelStyle(BaseGame.mySkin.get("arcade26", BitmapFont.class), null));
+        fishLabel = new TypingLabel("{FASTER}Remaining fishes: " + fishes.size, new Label.LabelStyle(BaseGame.mySkin.get("arcade26", BitmapFont.class), null));
         fishLabel.setColor(Color.LIME);
 
-        uiTable.defaults().padTop(Gdx.graphics.getHeight() * .09f);
-        uiTable.add(fishLabel).expandY().top();
+        turnLabel = new TypingLabel("Turns: " + numTurns, new Label.LabelStyle(BaseGame.mySkin.get("arcade26", BitmapFont.class), null));
+        turnLabel.setColor(Color.FOREST);
+        turnLabel.setAlignment(Align.center);
+
+        uiTable.padTop(staminaBar.getHeight() + Gdx.graphics.getHeight() * .02f);
+        uiTable.defaults().padTop(Gdx.graphics.getHeight() * .02f);
+        uiTable.add(fishLabel).row();
+        uiTable.add(turnLabel).prefWidth(Gdx.graphics.getWidth()).expandY().top();
         /*uiTable.setDebug(true);*/
     }
 }

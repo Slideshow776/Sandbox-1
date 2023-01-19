@@ -104,11 +104,11 @@ public class GameUtils {
         Gdx.app.log(tag, message + " took " + (endTime - startTime) + " ms to load.");
     }
 
-    public static boolean isDistanceBigEnough(Vector2 k1, Vector2 k2, Float distance) {
+    public static boolean isDistanceBigEnough(Vector2 k1, Vector2 k2, float distance) {
         return distanceBetween(k1, k2) >= distance;
     }
 
-    public static boolean isWithinDistance(Vector2 k1, Vector2 k2, Float distance) {
+    public static boolean isWithinDistance(Vector2 k1, Vector2 k2, float distance) {
         return distanceBetween(k1, k2) <= distance;
     }
 
