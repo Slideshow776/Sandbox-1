@@ -1,6 +1,7 @@
 package no.sandramoen.drawingGame.actors;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 
@@ -21,8 +22,8 @@ public class Box extends BaseActor {
 
     public void fadeAndRemove() {
         addAction(Actions.sequence(
-                Actions.fadeOut(1f),
-                Actions.run(() -> remove())
+                Actions.fadeOut(MathUtils.random(2f, 5f)),
+                Actions.removeActor()
         ));
     }
 }

@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ShortArray;
 
@@ -18,10 +19,10 @@ public class ShapeDrawer {
     public final int MAX_POLY_LINES = 60;
     public Array<Polyline> polylines;
 
-    private final boolean IS_DEBUG = false;
     private final float DISTANCE_BETWEEN_POLYLINES = Gdx.graphics.getWidth() * .01f;
     private Array<Box> collisionBoxes;
     private Array<Polygon> triangles;
+    private Array<Polygon> collisionPolygons;
     private Stage stage;
 
     public ShapeDrawer(Stage stage) {
@@ -29,6 +30,7 @@ public class ShapeDrawer {
 
         collisionBoxes = new Array();
         polylines = new Array();
+        collisionPolygons = new Array();
     }
 
     public boolean isItPossibleToDrawNewSegment(Vector2 start, Vector2 end) {
@@ -39,18 +41,35 @@ public class ShapeDrawer {
 
     public boolean drawNewLineSegment(Vector2 start, Vector2 end) {
         addPolyLine(start, end);
-        collisionBoxes.add(drawPolyLine(polylines.peek(), Color.RED, 1f));
+        collisionBoxes.add(drawPolyLine(polylines.peek(), Color.RED, 1f, false));
         return checkIfClosedShape();
     }
 
     public boolean isCollisionDetected(BaseActor baseActor) {
-        if (triangles != null)
+        return collisionByShape(baseActor);
+        // return collisionByTriangles(baseActor);
+    }
+
+    private boolean collisionByTriangles(BaseActor baseActor) {
+        if (triangles != null) // collision by triangles
             for (Polygon triangle : triangles) {
                 if (
                         triangle.contains(baseActor.getX(), baseActor.getY()) ||
                                 triangle.contains(baseActor.getX() + baseActor.getWidth(), baseActor.getY() + baseActor.getHeight())
                 ) return true;
             }
+        return false;
+    }
+
+    private boolean collisionByShape(BaseActor baseActor) {
+        for (Polygon polygon : collisionPolygons)
+            if (
+                    polygon.contains(new Vector2(baseActor.getX(), baseActor.getY())) &&
+                            polygon.contains(new Vector2(baseActor.getX(), baseActor.getY() + baseActor.getHeight())) &&
+                            polygon.contains(new Vector2(baseActor.getX() + baseActor.getWidth(), baseActor.getY() + baseActor.getHeight())) &&
+                            polygon.contains(new Vector2(baseActor.getX() + baseActor.getWidth(), baseActor.getY()))
+            )
+                return true;
         return false;
     }
 
@@ -101,7 +120,7 @@ public class ShapeDrawer {
 
     private void drawTriangle(Polygon triangle) {
         Array<Polyline> trianglePolylines = new Array();
-        Color color = GameUtils.randomLightColor();
+        Color color = new Color(0, 1, 1, MathUtils.random(.2f, .3f));
         for (int i = 0; i < 6; i += 2)
             trianglePolylines.add(myPolyline(
                     triangle.getVertices()[(i + 0) % 6],
@@ -111,15 +130,17 @@ public class ShapeDrawer {
             ));
 
         for (Polyline polyline : trianglePolylines)
-            drawPolyLine(polyline, color, 2);
+            drawPolyLine(polyline, color, 2, true);
     }
 
-    private Box drawPolyLine(Polyline polyline, Color color, float height) {
+    private Box drawPolyLine(Polyline polyline, Color color, float height, boolean fade) {
         Box box = new Box(polyline.getOriginX(), polyline.getOriginY(), stage);
         box.setSize(polyline.getLength(), height);
         box.setRotation(getPolyLineAngle(polyline));
         box.setBoundaryRectangle();
         box.setColor(color);
+        if (fade)
+            box.fadeAndRemove();
         return box;
     }
 
@@ -146,8 +167,8 @@ public class ShapeDrawer {
 
     public void reset() {
         clearBoxes(collisionBoxes);
-        polylines.clear();
-        triangles = null;
+        polylines.clear();/*
+        triangles = null;*/
     }
 
     private void clearBoxes(Array<Box> boxes) {
@@ -166,6 +187,8 @@ public class ShapeDrawer {
 
     private Array<Polygon> triangulate(Array<Polyline> openShape) {
         Array<Polyline> closedShape = closeTheShape(openShape);
+        for (Polyline polyline : closedShape)
+            drawPolyLine(polyline, Color.BLUE, 4, false);
         ShortArray triangles = computeTriangles(closedShape);
         return constructTriangles(closedShape, triangles);
     }
@@ -190,6 +213,8 @@ public class ShapeDrawer {
             i += 2;
         }
 
+        collisionPolygons.add(new Polygon(points));
+
         EarClippingTriangulator earClippingTriangulator = new EarClippingTriangulator();
         return earClippingTriangulator.computeTriangles(points);
     }
@@ -206,9 +231,7 @@ public class ShapeDrawer {
                     closedShape.get(triangles.get(i + 2)).getOriginY()
             });
             polygonTriangles.add(triangle);
-
-            if (IS_DEBUG)
-                drawTriangle(triangle);
+            drawTriangle(triangle);
         }
         return polygonTriangles;
     }

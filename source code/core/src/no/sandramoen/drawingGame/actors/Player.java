@@ -4,12 +4,14 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 
 import no.sandramoen.drawingGame.actors.utils.BaseActor;
 
 public class Player extends BaseActor {
     private final float SPEED = .035f;
+    private BaseActor collisionBox;
 
     public Player(float x, float y, Stage stage) {
         super(x, y, stage);
@@ -17,6 +19,13 @@ public class Player extends BaseActor {
         setColor(Color.MAGENTA);
         setSize(40f, 65f);
         centerAtPosition(x, y);
+
+        collisionBox = new BaseActor(0, 0, stage);
+        collisionBox.setSize(getWidth() * .4f, getHeight() * .2f);
+        collisionBox.setX(collisionBox.getWidth() * .75f);
+        collisionBox.setBoundaryRectangle();
+        collisionBox.setDebug(true);
+        addActor(collisionBox);
     }
 
     public void movePlayer(Array<Polyline> polylines) {
@@ -27,5 +36,11 @@ public class Player extends BaseActor {
                     SPEED)
             ));
         }
+    }
+
+    public void die() {
+        setOrigin(Align.bottom);
+        clearActions();
+        addAction(Actions.scaleTo(1, 0, .5f));
     }
 }

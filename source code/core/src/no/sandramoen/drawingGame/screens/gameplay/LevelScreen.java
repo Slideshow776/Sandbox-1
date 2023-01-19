@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -31,6 +32,7 @@ public class LevelScreen extends BaseScreen {
     private Array<BaseActor> fishes;
     private Player player;
     private int numTurns;
+    private Array<BaseActor> waterTriangles;
 
     private TypingLabel fishLabel;
     private TypingLabel turnLabel;
@@ -44,13 +46,18 @@ public class LevelScreen extends BaseScreen {
 
         fishes = new Array();
         spawnRandomFish();
+        spawnRandomFish();
         player = new Player(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .5f, mainStage);
+        waterTriangles = new Array();
 
         initializeGUI();
     }
 
     @Override
     public void update(float delta) {
+        if (shapeDrawer.isCollisionDetected(player)) {
+            player.die();
+        }
     }
 
     @Override
@@ -100,8 +107,8 @@ public class LevelScreen extends BaseScreen {
     private void collisionDetection() {
         for (BaseActor fish : fishes) {
             if (shapeDrawer.isCollisionDetected(fish)) {
-                fishes.removeValue(fish, false);
                 ((Fish) fish).fadeAndRemove();
+                fishes.removeValue(fish, false);
                 fishLabel.setText((fishes.size - 1) + "");
             }
         }
@@ -130,7 +137,7 @@ public class LevelScreen extends BaseScreen {
     }
 
     private void spawnRandomFish() {
-        if (fishes.isEmpty())
+        if (fishes.size < 3)
             fishes.add(new Fish(
                     MathUtils.random(0, Gdx.graphics.getWidth()),
                     MathUtils.random(0, Gdx.graphics.getHeight()),
@@ -143,6 +150,7 @@ public class LevelScreen extends BaseScreen {
 
         fishLabel = new TypingLabel("{FASTER}Remaining fishes: " + fishes.size, new Label.LabelStyle(BaseGame.mySkin.get("arcade26", BitmapFont.class), null));
         fishLabel.setColor(Color.LIME);
+        fishLabel.setAlignment(Align.center);
 
         turnLabel = new TypingLabel("Turns: " + numTurns, new Label.LabelStyle(BaseGame.mySkin.get("arcade26", BitmapFont.class), null));
         turnLabel.setColor(Color.FOREST);
@@ -150,7 +158,7 @@ public class LevelScreen extends BaseScreen {
 
         uiTable.padTop(staminaBar.getHeight() + Gdx.graphics.getHeight() * .02f);
         uiTable.defaults().padTop(Gdx.graphics.getHeight() * .02f);
-        uiTable.add(fishLabel).row();
+        uiTable.add(fishLabel).prefWidth(Gdx.graphics.getWidth()).row();
         uiTable.add(turnLabel).prefWidth(Gdx.graphics.getWidth()).expandY().top();
         /*uiTable.setDebug(true);*/
     }
