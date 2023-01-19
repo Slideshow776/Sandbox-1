@@ -1,4 +1,4 @@
-package no.sandramoen.sandbox.utils;
+package no.sandramoen.drawingGame.utils;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -8,15 +8,10 @@ import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetErrorListener;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
-import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
-import no.sandramoen.sandbox.screens.gameplay.LevelScreen;
+import no.sandramoen.drawingGame.screens.gameplay.LevelScreen;
 
 public abstract class BaseGame extends Game implements AssetErrorListener {
 

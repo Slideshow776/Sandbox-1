@@ -1,4 +1,4 @@
-package no.sandramoen.sandbox.utils;
+package no.sandramoen.drawingGame.utils;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -11,14 +11,14 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ShortArray;
 
-import no.sandramoen.sandbox.actors.Box;
-import no.sandramoen.sandbox.actors.utils.BaseActor;
+import no.sandramoen.drawingGame.actors.Box;
+import no.sandramoen.drawingGame.actors.utils.BaseActor;
 
 public class ShapeDrawer {
-    public final int MAX_POLY_LINES = 400;
+    public final int MAX_POLY_LINES = 60;
     public Array<Polyline> polylines;
 
-    private final boolean IS_DEBUG = true;
+    private final boolean IS_DEBUG = false;
     private final float DISTANCE_BETWEEN_POLYLINES = Gdx.graphics.getWidth() * .01f;
     private Array<Box> collisionBoxes;
     private Array<Polygon> triangles;

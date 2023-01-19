@@ -1,10 +1,9 @@
-package no.sandramoen.sandbox;
+package no.sandramoen.drawingGame;
 
 import android.os.Bundle;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
-import no.sandramoen.sandbox.MyGdxGame;
 
 public class AndroidLauncher extends AndroidApplication {
 	@Override

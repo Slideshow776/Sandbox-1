@@ -1,4 +1,4 @@
-package no.sandramoen.sandbox.actors.utils;
+package no.sandramoen.drawingGame.actors.utils;
 
 import static java.lang.Math.abs;
 
@@ -15,7 +15,7 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.scenes.scene2d.Group;
 
-import no.sandramoen.sandbox.utils.BaseGame;
+import no.sandramoen.drawingGame.utils.BaseGame;
 
 public class BaseActor extends Group {
 

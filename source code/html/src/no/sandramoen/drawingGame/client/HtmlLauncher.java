@@ -1,9 +1,9 @@
-package no.sandramoen.sandbox.client;
+package no.sandramoen.drawingGame.client;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.backends.gwt.GwtApplication;
 import com.badlogic.gdx.backends.gwt.GwtApplicationConfiguration;
-import no.sandramoen.sandbox.MyGdxGame;
+import no.sandramoen.drawingGame.MyGdxGame;
 
 public class HtmlLauncher extends GwtApplication {
 

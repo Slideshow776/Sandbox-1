@@ -1,10 +1,10 @@
-package no.sandramoen.sandbox.actors;
+package no.sandramoen.drawingGame.actors;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 
-import no.sandramoen.sandbox.actors.utils.BaseActor;
+import no.sandramoen.drawingGame.actors.utils.BaseActor;
 
 public class Fish extends BaseActor {
 

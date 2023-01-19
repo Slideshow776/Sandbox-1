@@ -1,19 +1,21 @@
-package no.sandramoen.sandbox.screens.gameplay;
+package no.sandramoen.drawingGame.screens.gameplay;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Array;
 
-import no.sandramoen.sandbox.actors.Fish;
-import no.sandramoen.sandbox.actors.utils.BaseActor;
-import no.sandramoen.sandbox.utils.BaseGame;
-import no.sandramoen.sandbox.utils.BaseScreen;
-import no.sandramoen.sandbox.utils.ShapeDrawer;
+import no.sandramoen.drawingGame.actors.Fish;
+import no.sandramoen.drawingGame.actors.utils.BaseActor;
+import no.sandramoen.drawingGame.ui.StaminaBar;
+import no.sandramoen.drawingGame.utils.BaseGame;
+import no.sandramoen.drawingGame.utils.BaseScreen;
+import no.sandramoen.drawingGame.utils.ShapeDrawer;
 
 import com.github.tommyettinger.textra.TypingLabel;
 
@@ -25,8 +27,8 @@ public class LevelScreen extends BaseScreen {
 
     private Array<BaseActor> fishes;
 
-    private TypingLabel staminaLabel;
     private TypingLabel fishLabel;
+    private StaminaBar staminaBar;
 
     @Override
     public void initialize() {
@@ -61,10 +63,11 @@ public class LevelScreen extends BaseScreen {
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         Vector3 worldCoordinates = mainStage.getCamera().unproject(new Vector3(screenX, screenY, 0f));
-
         if (isPlaying && shapeDrawer.isItPossibleToDrawNewSegment(touchDownPoint, new Vector2(worldCoordinates.x, worldCoordinates.y))) {
             boolean isClosedShape = shapeDrawer.drawNewLineSegment(touchDownPoint, new Vector2(worldCoordinates.x, worldCoordinates.y));
-            staminaLabel.setText(String.valueOf(shapeDrawer.MAX_POLY_LINES - shapeDrawer.polylines.size));
+
+            float percent = (shapeDrawer.MAX_POLY_LINES - shapeDrawer.polylines.size) / (float) shapeDrawer.MAX_POLY_LINES;
+            staminaBar.decrement(percent);
 
             collisionDetection();
             if (isClosedShape)
@@ -74,7 +77,7 @@ public class LevelScreen extends BaseScreen {
     }
 
     @Override
-    public boolean keyDown(int keycode)  {
+    public boolean keyDown(int keycode) {
         if (keycode == Keys.ESCAPE || keycode == Keys.Q)
             Gdx.app.exit();
         else if (keycode == Keys.R)
@@ -83,11 +86,13 @@ public class LevelScreen extends BaseScreen {
     }
 
     private void collisionDetection() {
-        for (BaseActor fish : fishes)
+        for (BaseActor fish : fishes) {
             if (shapeDrawer.isCollisionDetected(fish)) {
+                fishes.removeValue(fish, false);
                 ((Fish) fish).fadeAndRemove();
                 fishLabel.setText((fishes.size - 1) + "");
             }
+        }
     }
 
     private void endTurn() {
@@ -95,19 +100,24 @@ public class LevelScreen extends BaseScreen {
             isPlaying = false;
             shapeDrawer.reset();
             touchDownPoint.set(0, 0);
-            System.out.println();
+            staminaBar.reset();
+            if (fishes.isEmpty())
+                fishes.add(new Fish(
+                        MathUtils.random(0, Gdx.graphics.getWidth()),
+                        MathUtils.random(0, Gdx.graphics.getHeight()),
+                        mainStage
+                ));
+            fishLabel.setText(fishes.size + "");
         }
     }
 
     private void initializeGUI() {
-        staminaLabel = new TypingLabel(shapeDrawer.MAX_POLY_LINES + "", new Label.LabelStyle(BaseGame.mySkin.get("arcade26", BitmapFont.class), null));
-        staminaLabel.setColor(Color.FIREBRICK);
+        staminaBar = new StaminaBar(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .98f, uiStage);
 
         fishLabel = new TypingLabel(fishes.size + "", new Label.LabelStyle(BaseGame.mySkin.get("arcade26", BitmapFont.class), null));
         fishLabel.setColor(Color.LIME);
 
-        uiTable.defaults().padTop(Gdx.graphics.getHeight() * .02f);
-        uiTable.add(staminaLabel).row();
+        uiTable.defaults().padTop(Gdx.graphics.getHeight() * .09f);
         uiTable.add(fishLabel).expandY().top();
         /*uiTable.setDebug(true);*/
     }

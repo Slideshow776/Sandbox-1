@@ -1,11 +1,9 @@
-package no.sandramoen.sandbox;
+package no.sandramoen.drawingGame;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 
 import java.awt.Dimension;
-
-import no.sandramoen.sandbox.MyGdxGame;
 
 // Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
 public class DesktopLauncher {
