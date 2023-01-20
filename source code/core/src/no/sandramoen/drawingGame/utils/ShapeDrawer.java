@@ -23,6 +23,7 @@ public class ShapeDrawer {
     private Array<Box> collisionBoxes;
     private Array<Polygon> triangles;
     private Array<Polygon> collisionPolygons;
+    private Array<Polyline> closedShape;
     private Stage stage;
 
     public ShapeDrawer(Stage stage) {
@@ -45,9 +46,23 @@ public class ShapeDrawer {
         return checkIfClosedShape();
     }
 
+    public void drawClosedShape() {
+        for (Polyline polyline : closedShape)
+            drawPolyLine(polyline, Color.BLUE, 4, false);
+
+        for (Polygon triangle : triangles)
+            drawTriangle(triangle);
+    }
+
     public boolean isCollisionDetected(BaseActor baseActor) {
         return collisionByShape(baseActor);
         // return collisionByTriangles(baseActor);
+    }
+
+    public void reset() {
+        clearBoxes(collisionBoxes);
+        polylines.clear();/*
+        triangles = null;*/
     }
 
     private boolean collisionByTriangles(BaseActor baseActor) {
@@ -165,12 +180,6 @@ public class ShapeDrawer {
     }
 
 
-    public void reset() {
-        clearBoxes(collisionBoxes);
-        polylines.clear();/*
-        triangles = null;*/
-    }
-
     private void clearBoxes(Array<Box> boxes) {
         for (Box box : boxes)
             box.fadeAndRemove();
@@ -186,9 +195,7 @@ public class ShapeDrawer {
 
 
     private Array<Polygon> triangulate(Array<Polyline> openShape) {
-        Array<Polyline> closedShape = closeTheShape(openShape);
-        for (Polyline polyline : closedShape)
-            drawPolyLine(polyline, Color.BLUE, 4, false);
+        closedShape = closeTheShape(openShape);
         ShortArray triangles = computeTriangles(closedShape);
         return constructTriangles(closedShape, triangles);
     }
@@ -231,7 +238,6 @@ public class ShapeDrawer {
                     closedShape.get(triangles.get(i + 2)).getOriginY()
             });
             polygonTriangles.add(triangle);
-            drawTriangle(triangle);
         }
         return polygonTriangles;
     }

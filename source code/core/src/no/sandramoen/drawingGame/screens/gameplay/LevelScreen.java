@@ -5,9 +5,9 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
@@ -76,7 +76,7 @@ public class LevelScreen extends BaseScreen {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        endTurn();
+        endTurn(false);
         return super.touchUp(screenX, screenY, pointer, button);
     }
 
@@ -90,7 +90,7 @@ public class LevelScreen extends BaseScreen {
 
             collisionDetection();
             if (isClosedShape)
-                endTurn();
+                endTurn(true);
         }
         return super.touchDragged(screenX, screenY, pointer);
     }
@@ -114,9 +114,12 @@ public class LevelScreen extends BaseScreen {
         }
     }
 
-    private void endTurn() {
+    private void endTurn(boolean isClosedShape) {
         if (isPlaying) {
-            player.movePlayer(shapeDrawer.polylines);
+            if (isClosedShape)
+                player.move(shapeDrawer.polylines, Actions.run(() -> shapeDrawer.drawClosedShape()));
+            else
+                player.move(shapeDrawer.polylines);
             resetTurn();
         }
     }

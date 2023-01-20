@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.RunnableAction;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 
@@ -28,7 +29,16 @@ public class Player extends BaseActor {
         addActor(collisionBox);
     }
 
-    public void movePlayer(Array<Polyline> polylines) {
+    public void move(Array<Polyline> polylines) {
+        moveAlongPolylines(polylines);
+    }
+
+    public void move(Array<Polyline> polylines, RunnableAction runnableAction) {
+        moveAlongPolylines(polylines);
+        addAction(Actions.after(runnableAction));
+    }
+
+    private void moveAlongPolylines(Array<Polyline> polylines) {
         for (Polyline polyline : polylines) {
             addAction(Actions.after(Actions.moveTo(
                     polyline.getX() - getWidth() / 2,
