@@ -5,15 +5,17 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.RunnableAction;
 import com.badlogic.gdx.utils.Align;
 
 import no.sandramoen.drawingGame.actors.utils.BaseActor;
 
 public class Fish extends BaseActor {
+    public boolean isRemoved;
+
     private boolean isFrozen = MathUtils.randomBoolean();
     private final float ACCELERATION = 500;
     private final float MAX_MOVEMENT_SPEED = 50;
-
     private float changeDirectionCounter;
     private final float CHANGE_DIRECTION_FREQUENCY = 2;
 
@@ -35,7 +37,7 @@ public class Fish extends BaseActor {
     @Override
     public void act(float delta) {
         super.act(delta);
-        if (true) {//!isFrozen) {
+        if (!isFrozen) {
             periodicallyChangeDirection(delta);
             keepInsideScreen();
             accelerateAtAngle(getRotation());
@@ -43,10 +45,14 @@ public class Fish extends BaseActor {
         }
     }
 
-    public void fadeAndRemove() {
+    public void fadeAndRemove(RunnableAction removeFromList) {
         addAction(Actions.sequence(
                 Actions.fadeOut(1f),
-                Actions.run(() -> remove())
+                removeFromList,
+                Actions.run(() -> {
+                    isRemoved = true;
+                    remove();
+                })
         ));
     }
 

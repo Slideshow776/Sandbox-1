@@ -29,10 +29,6 @@ public class Player extends BaseActor {
         addActor(collisionBox);
     }
 
-    public void move(Array<Polyline> polylines) {
-        moveAlongPolylines(polylines);
-    }
-
     public void move(Array<Polyline> polylines, RunnableAction runnableAction) {
         moveAlongPolylines(polylines);
         addAction(Actions.after(runnableAction));

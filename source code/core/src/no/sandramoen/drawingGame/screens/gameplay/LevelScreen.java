@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.RunnableAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
@@ -29,7 +30,7 @@ public class LevelScreen extends BaseScreen {
 
     private ShapeDrawer shapeDrawer;
 
-    private Array<BaseActor> fishes;
+    private Array<Fish> fishes;
     private Player player;
     private int numTurns;
     private Array<BaseActor> waterTriangles;
@@ -87,8 +88,6 @@ public class LevelScreen extends BaseScreen {
             boolean isClosedShape = shapeDrawer.drawNewLineSegment(touchDownPoint, new Vector2(worldCoordinates.x, worldCoordinates.y));
 
             updateStaminaBar();
-
-            collisionDetection();
             if (isClosedShape)
                 endTurn(true);
         }
@@ -107,8 +106,8 @@ public class LevelScreen extends BaseScreen {
     private void collisionDetection() {
         for (BaseActor fish : fishes) {
             if (shapeDrawer.isCollisionDetected(fish)) {
-                ((Fish) fish).fadeAndRemove();
-                fishes.removeValue(fish, false);
+                RunnableAction removeFromList = Actions.run(() -> fishes.removeValue((Fish) fish, false));
+                ((Fish) fish).fadeAndRemove(removeFromList);
                 fishLabel.setText((fishes.size - 1) + "");
             }
         }
@@ -116,10 +115,13 @@ public class LevelScreen extends BaseScreen {
 
     private void endTurn(boolean isClosedShape) {
         if (isPlaying) {
-            if (isClosedShape)
-                player.move(shapeDrawer.polylines, Actions.run(() -> shapeDrawer.drawClosedShape()));
-            else
-                player.move(shapeDrawer.polylines);
+            RunnableAction runnableAction = Actions.run(() -> {
+                collisionDetection();
+                staminaBar.reset();
+                if (isClosedShape)
+                    shapeDrawer.drawClosedShape();
+            });
+            player.move(shapeDrawer.polylines, runnableAction);
             resetTurn();
         }
     }
@@ -128,7 +130,6 @@ public class LevelScreen extends BaseScreen {
         isPlaying = false;
         shapeDrawer.reset();
         touchDownPoint.set(0, 0);
-        staminaBar.reset();
         spawnRandomFish();
         fishLabel.setText("Remaining fishes: " + fishes.size);
         turnLabel.setText("Turns: " + ++numTurns);
@@ -140,7 +141,7 @@ public class LevelScreen extends BaseScreen {
     }
 
     private void spawnRandomFish() {
-        if (fishes.size < 3)
+        if (fishes.size < 2)
             fishes.add(new Fish(
                     MathUtils.random(0, Gdx.graphics.getWidth()),
                     MathUtils.random(0, Gdx.graphics.getHeight()),
