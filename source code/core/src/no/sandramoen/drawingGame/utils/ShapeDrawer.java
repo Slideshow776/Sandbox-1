@@ -8,7 +8,6 @@ import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ShortArray;
 
@@ -22,6 +21,7 @@ public class ShapeDrawer {
     private final float DISTANCE_BETWEEN_POLYLINES = Gdx.graphics.getWidth() * .01f;
     private Array<Box> collisionBoxes;
     private Array<Polygon> triangles;
+    private Polygon collisionPolygon;
     private Array<Polygon> collisionPolygons;
     private Array<Polyline> closedShape;
     private Stage stage;
@@ -55,8 +55,14 @@ public class ShapeDrawer {
     }
 
     public boolean isCollisionDetected(BaseActor baseActor) {
-        return collisionByShape(baseActor);
+        return collisionByShape(collisionPolygons, baseActor);
         // return collisionByTriangles(baseActor);
+    }
+
+    public boolean isCollisionDetectedOnLastDrawnShape(BaseActor baseActor) {
+        Array<Polygon> temp = new Array();
+        temp.add(collisionPolygon);
+        return collisionByShape(temp, baseActor);
     }
 
     public void reset() {
@@ -64,6 +70,12 @@ public class ShapeDrawer {
         polylines.clear();/*
         triangles = null;*/
     }
+
+    public void addCollisionPolygon() {
+        if (collisionPolygon != null)
+            collisionPolygons.add(collisionPolygon);
+    }
+
 
     private boolean collisionByTriangles(BaseActor baseActor) {
         if (triangles != null) // collision by triangles
@@ -76,7 +88,7 @@ public class ShapeDrawer {
         return false;
     }
 
-    private boolean collisionByShape(BaseActor baseActor) {
+    private boolean collisionByShape(Array<Polygon> collisionPolygons, BaseActor baseActor) {
         for (Polygon polygon : collisionPolygons)
             if (
                     polygon.contains(new Vector2(baseActor.getX(), baseActor.getY())) &&
@@ -220,7 +232,7 @@ public class ShapeDrawer {
             i += 2;
         }
 
-        collisionPolygons.add(new Polygon(points));
+        collisionPolygon = new Polygon(points);
 
         EarClippingTriangulator earClippingTriangulator = new EarClippingTriangulator();
         return earClippingTriangulator.computeTriangles(points);

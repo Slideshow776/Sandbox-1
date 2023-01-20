@@ -46,8 +46,8 @@ public class LevelScreen extends BaseScreen {
         shapeDrawer = new ShapeDrawer(mainStage);
 
         fishes = new Array();
-        spawnRandomFish();
-        spawnRandomFish();
+        for (int i = 0; i < 3; i++)
+            spawnRandomFish();
         player = new Player(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .5f, mainStage);
         waterTriangles = new Array();
 
@@ -56,9 +56,8 @@ public class LevelScreen extends BaseScreen {
 
     @Override
     public void update(float delta) {
-        if (shapeDrawer.isCollisionDetected(player)) {
+        if (shapeDrawer.isCollisionDetected(player))
             player.die();
-        }
     }
 
     @Override
@@ -105,23 +104,25 @@ public class LevelScreen extends BaseScreen {
 
     private void collisionDetection() {
         for (BaseActor fish : fishes) {
-            if (shapeDrawer.isCollisionDetected(fish)) {
+            if (shapeDrawer.isCollisionDetectedOnLastDrawnShape(fish)) {
                 RunnableAction removeFromList = Actions.run(() -> fishes.removeValue((Fish) fish, false));
                 ((Fish) fish).fadeAndRemove(removeFromList);
-                fishLabel.setText((fishes.size - 1) + "");
+                fishLabel.setText("{FASTER}Remaining fishes: " + (fishes.size - 1));
             }
         }
     }
 
     private void endTurn(boolean isClosedShape) {
         if (isPlaying) {
-            RunnableAction runnableAction = Actions.run(() -> {
-                collisionDetection();
+            RunnableAction doThisAfter = Actions.run(() -> {
+                shapeDrawer.addCollisionPolygon();
                 staminaBar.reset();
-                if (isClosedShape)
+                if (isClosedShape) {
                     shapeDrawer.drawClosedShape();
+                    collisionDetection();
+                }
             });
-            player.move(shapeDrawer.polylines, runnableAction);
+            player.move(shapeDrawer.polylines, doThisAfter);
             resetTurn();
         }
     }
@@ -141,7 +142,7 @@ public class LevelScreen extends BaseScreen {
     }
 
     private void spawnRandomFish() {
-        if (fishes.size < 2)
+        if (fishes.size < 3)
             fishes.add(new Fish(
                     MathUtils.random(0, Gdx.graphics.getWidth()),
                     MathUtils.random(0, Gdx.graphics.getHeight()),

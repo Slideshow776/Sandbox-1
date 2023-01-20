@@ -17,7 +17,7 @@ android {
         exclude 'META-INF/robovm/ios/robovm.xml'
     }
     defaultConfig {
-        applicationId "no.sandramoen.sandbox"
+        applicationId "no.sandramoen.drawingGame"
         minSdkVersion 14
         targetSdkVersion 32
         versionCode 1
@@ -82,7 +82,7 @@ task run(type: Exec) {
     }
 
     def adb = path + "/platform-tools/adb"
-    commandLine "$adb", 'shell', 'am', 'start', '-n', 'no.sandramoen.sandbox/no.sandramoen.sandbox.AndroidLauncher'
+    commandLine "$adb", 'shell', 'am', 'start', '-n', 'no.sandramoen.drawingGame/no.sandramoen.drawingGame.AndroidLauncher'
 }
 
 eclipse.project.name = appName + "-android"

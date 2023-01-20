@@ -21,7 +21,7 @@ public class GameUtils {
     }
 
     public static void loadGameState() {
-        BaseGame.preferences = Gdx.app.getPreferences("Sandbox1GameState");
+        BaseGame.preferences = Gdx.app.getPreferences("drawingGameGameState");
         BaseGame.loadPersonalParameters = BaseGame.preferences.getBoolean("loadPersonalParameters");
         BaseGame.musicVolume = BaseGame.preferences.getFloat("musicVolume");
         BaseGame.soundVolume = BaseGame.preferences.getFloat("soundVolume");

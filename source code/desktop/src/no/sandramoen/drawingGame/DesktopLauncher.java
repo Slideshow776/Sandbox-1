@@ -10,7 +10,7 @@ public class DesktopLauncher {
     public static void main(String[] arg) {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.setForegroundFPS(60);
-        config.setTitle("Sandbox");
+        config.setTitle("drawingGame");
         config.setResizable(false);
         // config.setWindowIcon("images/excluded/icon_16x16.png", "images/excluded/icon_32x32.png");
 

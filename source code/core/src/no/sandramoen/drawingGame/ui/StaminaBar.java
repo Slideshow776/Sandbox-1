@@ -40,6 +40,6 @@ public class StaminaBar extends BaseActor {
     }
 
     public void reset() {
-        progress.addAction(Actions.sizeTo(getWidth(), getHeight(), .5f, Interpolation.exp10In));
+        progress.addAction(Actions.sizeTo(getWidth(), getHeight(), 1f, Interpolation.bounceOut));
     }
 }
