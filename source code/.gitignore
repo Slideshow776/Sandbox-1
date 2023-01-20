@@ -1,4 +1,5 @@
 ## packr
+exeBuilder.bat
 /packr build files
 
 ## Java
