@@ -32,7 +32,7 @@ Read on below for project specifics.
      The challenge presented is to encircle the fish with the mouse cursor or finger if on an Android device.  
       The avatar will move after touch release, and it's important not to draw your shapes such that the avatar does not fall into the water, and successfully encircles the moving fish.
 
-     The game is also ment to bring forth positive feelings regarding the need for inclusion of different people, as the main character is [Sami](https://en.wikipedia.org/wiki/Sámi).
+     The game is also meant to bring forth positive feelings regarding the need for the inclusion of different people, as the main character is [Sami](https://en.wikipedia.org/wiki/Sámi).
 
 2. :purple_heart: Mechanics: the rules of the game world
 
@@ -46,7 +46,7 @@ Read on below for project specifics.
 
    - **What obstacles or difficulties will the character face?**
 
-     Drawing overlapping shapes will result in the player falling into the water, and thus loosing the game.
+     Drawing overlapping shapes will result in the player falling into the water, and thus losing the game.
      The player also needs to time their avatar so the shape drawn includes moving fish.
      The player will also need to avoid impassable terrain.
 
@@ -59,9 +59,9 @@ Read on below for project specifics.
 
    - **What hardware is required by the game?**
 
-     - Desktop needs to have a functional mouse, and screen. This game will not require a powerful computer.
+     - Desktop needs to have a functional mouse and screen. This game will not require a powerful computer.
 
-     - Android devices needs to have a funcitonal touch technology or mouse option
+     - Android devices need to have a functional touch technology or mouse option
 
    - **What type of proficiency will the player need to develop to become proficient at the game?**
 
@@ -78,13 +78,13 @@ Read on below for project specifics.
 
    - **What menus, screens, or overlays will there be?**
 
-     - A splash screen, displaying the game developer logo
+     - A splash screen, displaying the game developer's logo
      - A main menu screen
      - An options screen
      - A level select screen
      - Level screens
 
-     The level screens will have overlays with their, respective options, for game start, over and end.
+     The level screens will have overlays with their, respective options, for game start, over, and end.
 
    - **How does the player interact with the game at the software level?**
 
@@ -94,7 +94,7 @@ Read on below for project specifics.
 
    - **Describe the style and feel of the game.**
 
-        Slow pace turn based, plenty of time to think.
+        Slow pace turn-based, plenty of time to think.
         Vibrant cartoony colors and shapes.
         Feelings of being out in nature.        
 
@@ -104,8 +104,8 @@ Read on below for project specifics.
 
    - **What style of background music, ambient sounds will the game use?**
 
-        * Calm music, possibly something reminicent of Sami culture?
-        * Nature ambiance sounds, birds chirping, wind, reindeers, ...
+        * Calm music, possibly something reminiscent of Sami culture?
+        * Nature ambiance sounds, birds chirping, wind, reindeer, ...
 
    - **What is the relevant backstory for the game?**
 
@@ -114,7 +114,7 @@ Read on below for project specifics.
 
    - **What emotional state(s) does the game try to provoke?**
 
-        The game centers around the feelings of pride and engagement.
+        The game centers around feelings of pride and engagement.
         It also explores feelings of shame in disempowerment, and frustration of being excluded.
 
    - **What makes the game fun?**
@@ -125,7 +125,9 @@ Read on below for project specifics.
 
    - **List the team members and their roles, responsibilities, and skills.**
 
-     This project will be completed individually; graphics and audio will be obtained from third-party websites that make their assets available under the Creative Commons license, and so the main task will be programming and creating some graphics.
+     This project will be completed individually; Audio will be obtained from third-party websites that make their assets available under the Creative Commons license, and so the main task will be programming and creating some graphics.
+     
+     Additionally, there will be an external consultant on Sámi culture to ensure realism and fair use.
 
    - **What equipment is needed for this project?**
 
