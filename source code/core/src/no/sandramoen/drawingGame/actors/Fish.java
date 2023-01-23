@@ -22,10 +22,11 @@ public class Fish extends BaseActor {
     public Fish(float x, float y, Stage stage) {
         super(x, y, stage);
         loadImage("whitePixel");
-        setColor(Color.LIGHT_GRAY);
+        setColor(Color.BLACK);
         setSize(50f, 20f);
         centerAtPosition(x, y);
         setOrigin(Align.center);
+        setRotation(MathUtils.random(0f, 360f));
 
         setBoundaryRectangle();
 

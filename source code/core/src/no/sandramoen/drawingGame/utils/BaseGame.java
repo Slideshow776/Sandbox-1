@@ -11,6 +11,7 @@ import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
+import no.sandramoen.drawingGame.screens.BaseScreen;
 import no.sandramoen.drawingGame.screens.gameplay.LevelScreen;
 
 public abstract class BaseGame extends Game implements AssetErrorListener {

@@ -1,4 +1,4 @@
-package no.sandramoen.drawingGame.utils;
+package no.sandramoen.drawingGame.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -10,13 +10,15 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public abstract class BaseScreen implements Screen, InputProcessor {
+    protected Stage groundStage;
     protected Stage mainStage;
     protected Stage uiStage;
     protected Table uiTable;
 
-    private boolean isDebug = false;
-
     public BaseScreen() {
+        groundStage = new Stage();
+        groundStage.setViewport(new ScreenViewport());
+
         mainStage = new Stage();
         mainStage.setViewport(new ScreenViewport());
 
@@ -37,10 +39,14 @@ public abstract class BaseScreen implements Screen, InputProcessor {
     public void render(float delta) {
         uiStage.act(delta);
         mainStage.act(delta);
+        groundStage.act(delta);
         update(delta);
 
         Gdx.gl.glClearColor(0.035f, 0.039f, 0.078f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        groundStage.getViewport().apply();
+        drawGroundStage(delta);
 
         mainStage.getViewport().apply();
         mainStage.draw();
@@ -49,12 +55,17 @@ public abstract class BaseScreen implements Screen, InputProcessor {
         uiStage.draw();
     }
 
+    public void drawGroundStage(float delta) {
+        groundStage.draw();
+    }
+
     @Override
     public void show() {
         InputMultiplexer im = (InputMultiplexer) Gdx.input.getInputProcessor();
         im.addProcessor(this);
         im.addProcessor(uiStage);
         im.addProcessor(mainStage);
+        im.addProcessor(groundStage);
     }
 
     @Override
@@ -63,10 +74,12 @@ public abstract class BaseScreen implements Screen, InputProcessor {
         im.removeProcessor(this);
         im.removeProcessor(uiStage);
         im.removeProcessor(mainStage);
+        im.removeProcessor(groundStage);
     }
 
     @Override
     public void resize(int width, int height) {
+        groundStage.getViewport().update(width, height, true);
         mainStage.getViewport().update(width, height, true);
         uiStage.getViewport().update(width, height, true);
     }

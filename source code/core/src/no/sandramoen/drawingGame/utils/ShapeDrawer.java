@@ -17,14 +17,15 @@ import no.sandramoen.drawingGame.actors.utils.BaseActor;
 public class ShapeDrawer {
     public final int MAX_POLY_LINES = 60;
     public Array<Polyline> polylines;
+    public Array<Polygon> triangles;
 
     private final float DISTANCE_BETWEEN_POLYLINES = Gdx.graphics.getWidth() * .01f;
     private Array<Box> collisionBoxes;
-    private Array<Polygon> triangles;
-    private Polygon collisionPolygon;
     private Array<Polygon> collisionPolygons;
+    private Polygon collisionPolygon;
     private Array<Polyline> closedShape;
     private Stage stage;
+    private Array<Polygon> trianglesToBeAdded;
 
     public ShapeDrawer(Stage stage) {
         this.stage = stage;
@@ -32,6 +33,8 @@ public class ShapeDrawer {
         collisionBoxes = new Array();
         polylines = new Array();
         collisionPolygons = new Array();
+        triangles = new Array();
+        trianglesToBeAdded = new Array();
     }
 
     public boolean isItPossibleToDrawNewSegment(Vector2 start, Vector2 end) {
@@ -42,8 +45,13 @@ public class ShapeDrawer {
 
     public boolean drawNewLineSegment(Vector2 start, Vector2 end) {
         addPolyLine(start, end);
-        collisionBoxes.add(drawPolyLine(polylines.peek(), Color.RED, 1f, false));
+        collisionBoxes.add(drawPolyLine(polylines.peek(), Color.DARK_GRAY, 1f, false));
         return checkIfClosedShape();
+    }
+
+    public void addTriangles() {
+        for (Polygon triangle : trianglesToBeAdded)
+            triangles.add(triangle);
     }
 
     public void drawClosedShape() {
@@ -124,7 +132,7 @@ public class ShapeDrawer {
             if (isIndexTwoLastPlacesInArray(polylines, i)) {
                 continue;
             } else if (collisionBoxes.peek().overlaps(collisionBoxes.get(i))) {
-                triangles = triangulate(getClosedShape(i));
+                triangulate(getClosedShape(i));
                 return true;
             }
         }
@@ -206,10 +214,10 @@ public class ShapeDrawer {
     }
 
 
-    private Array<Polygon> triangulate(Array<Polyline> openShape) {
+    private void triangulate(Array<Polyline> openShape) {
         closedShape = closeTheShape(openShape);
         ShortArray triangles = computeTriangles(closedShape);
-        return constructTriangles(closedShape, triangles);
+        constructTriangles(closedShape, triangles);
     }
 
     private Array<Polyline> closeTheShape(Array<Polyline> openShape) {
@@ -238,19 +246,17 @@ public class ShapeDrawer {
         return earClippingTriangulator.computeTriangles(points);
     }
 
-    private Array<Polygon> constructTriangles(Array<Polyline> closedShape, ShortArray triangles) {
-        Array<Polygon> polygonTriangles = new Array();
-        for (int i = 0; i < triangles.size; i += 3) {
+    private void constructTriangles(Array<Polyline> closedShape, ShortArray triangulatedTriangles) {
+        for (int i = 0; i < triangulatedTriangles.size; i += 3) {
             Polygon triangle = new Polygon(new float[]{
-                    closedShape.get(triangles.get(i + 0)).getOriginX(),
-                    closedShape.get(triangles.get(i + 0)).getOriginY(),
-                    closedShape.get(triangles.get(i + 1)).getOriginX(),
-                    closedShape.get(triangles.get(i + 1)).getOriginY(),
-                    closedShape.get(triangles.get(i + 2)).getOriginX(),
-                    closedShape.get(triangles.get(i + 2)).getOriginY()
+                    closedShape.get(triangulatedTriangles.get(i + 0)).getOriginX(),
+                    closedShape.get(triangulatedTriangles.get(i + 0)).getOriginY(),
+                    closedShape.get(triangulatedTriangles.get(i + 1)).getOriginX(),
+                    closedShape.get(triangulatedTriangles.get(i + 1)).getOriginY(),
+                    closedShape.get(triangulatedTriangles.get(i + 2)).getOriginX(),
+                    closedShape.get(triangulatedTriangles.get(i + 2)).getOriginY()
             });
-            polygonTriangles.add(triangle);
+            trianglesToBeAdded.add(triangle);
         }
-        return polygonTriangles;
     }
 }

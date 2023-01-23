@@ -21,7 +21,7 @@ public class BaseActor extends Group {
 
     protected static Rectangle worldBounds;
 
-    private Animation<TextureRegion> animation;
+    public Animation<TextureRegion> animation;
     private float animationTime = 0f;
     private boolean animationPaused = false;
 
