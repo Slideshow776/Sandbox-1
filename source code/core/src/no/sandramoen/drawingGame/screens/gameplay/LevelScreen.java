@@ -89,6 +89,7 @@ public class LevelScreen extends BaseScreen {
     @Override
     public void drawGroundStage(float delta) {
         super.drawGroundStage(delta);
+        // drawOutlinesAroundHolesInIce();
         drawMasks();
         drawMasked(delta);
     }
@@ -145,7 +146,7 @@ public class LevelScreen extends BaseScreen {
         if (GameUtils.isWithinDistance(
                 new Vector2(worldCoordinates.x, worldCoordinates.y),
                 new Vector2(player.getX() + player.getWidth() / 2, player.getY() + player.getHeight() / 2),
-                Gdx.graphics.getWidth() * .075f)
+                Gdx.graphics.getWidth() * .04f)
         ) {
             isPlaying = true;
             touchDownPoint.set(worldCoordinates.x, worldCoordinates.y);
@@ -162,6 +163,10 @@ public class LevelScreen extends BaseScreen {
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         Vector3 worldCoordinates = groundStage.getCamera().unproject(new Vector3(screenX, screenY, 0f));
+
+        if (isOutOfBounds(worldCoordinates))
+            return super.touchDragged(screenX, screenY, pointer);
+
         if (isPlaying && shapeDrawer.isItPossibleToDrawNewSegment(touchDownPoint, new Vector2(worldCoordinates.x, worldCoordinates.y))) {
             boolean isClosedShape = shapeDrawer.drawNewLineSegment(touchDownPoint, new Vector2(worldCoordinates.x, worldCoordinates.y));
 
@@ -169,6 +174,7 @@ public class LevelScreen extends BaseScreen {
             if (isClosedShape)
                 endTurn(true);
         }
+
         return super.touchDragged(screenX, screenY, pointer);
     }
 
@@ -194,9 +200,9 @@ public class LevelScreen extends BaseScreen {
     private void endTurn(boolean isClosedShape) {
         if (isPlaying) {
             RunnableAction doThisAfter = Actions.run(() -> {
-                shapeDrawer.addCollisionPolygon();
                 staminaBar.reset();
                 if (isClosedShape) {
+                    shapeDrawer.addCollisionPolygon();
                     shapeDrawer.addTriangles();
                     collisionDetection();
                 }
@@ -229,11 +235,31 @@ public class LevelScreen extends BaseScreen {
             ));
     }
 
+
+    private void drawOutlinesAroundHolesInIce() {
+        shapeRenderer.begin();
+        shapeRenderer.setColor(Color.BLACK);
+        for (Polygon polygon : shapeDrawer.collisionPolygons)
+            shapeRenderer.polygon(polygon.getVertices());
+        shapeRenderer.end();
+    }
+
+    private boolean isOutOfBounds(Vector3 worldCoordinates) {
+        if (
+                worldCoordinates.x > Gdx.graphics.getWidth() ||
+                        worldCoordinates.x < 0 ||
+                        worldCoordinates.y > Gdx.graphics.getHeight() ||
+                        worldCoordinates.y < 0
+        )
+            return true;
+        return false;
+    }
+
     private void initializeGUI() {
         staminaBar = new StaminaBar(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .98f, uiStage);
 
         fishLabel = new TypingLabel("{FASTER}Remaining fishes: " + fishes.size, new Label.LabelStyle(BaseGame.mySkin.get("arcade26", BitmapFont.class), null));
-        fishLabel.setColor(Color.LIME);
+        fishLabel.setColor(Color.FOREST);
         fishLabel.setAlignment(Align.center);
 
         turnLabel = new TypingLabel("Turns: " + numTurns, new Label.LabelStyle(BaseGame.mySkin.get("arcade26", BitmapFont.class), null));

@@ -3,6 +3,7 @@ package no.sandramoen.drawingGame.utils;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.EarClippingTriangulator;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Polyline;
@@ -18,12 +19,12 @@ public class ShapeDrawer {
     public final int MAX_POLY_LINES = 60;
     public Array<Polyline> polylines;
     public Array<Polygon> triangles;
+    public Array<Polyline> closedShape;
+    public Array<Polygon> collisionPolygons;
 
     private final float DISTANCE_BETWEEN_POLYLINES = Gdx.graphics.getWidth() * .01f;
     private Array<Box> collisionBoxes;
-    private Array<Polygon> collisionPolygons;
     private Polygon collisionPolygon;
-    private Array<Polyline> closedShape;
     private Stage stage;
     private Array<Polygon> trianglesToBeAdded;
 
@@ -35,6 +36,7 @@ public class ShapeDrawer {
         collisionPolygons = new Array();
         triangles = new Array();
         trianglesToBeAdded = new Array();
+        closedShape = new Array();
     }
 
     public boolean isItPossibleToDrawNewSegment(Vector2 start, Vector2 end) {
@@ -80,8 +82,42 @@ public class ShapeDrawer {
     }
 
     public void addCollisionPolygon() {
-        if (collisionPolygon != null)
+        if (collisionPolygon != null) {
             collisionPolygons.add(collisionPolygon);
+
+            // detect overlapping polygons
+            // while (detectOverlappingPolygons());
+        }
+    }
+
+    private boolean detectOverlappingPolygons() {
+        for (int i = 0; i < collisionPolygons.size; i++) {
+            jLoop:
+            for (int j = 0; j < collisionPolygons.size; j++) {
+                Polygon polygonA = collisionPolygons.get(i);
+                Polygon polygonB = collisionPolygons.get(j);
+
+                if (polygonA == polygonB)
+                    continue;
+
+                for (int k = 0; k < polygonB.getVertices().length - 1; k++) {
+                    if (polygonA.contains(new Vector2(
+                            polygonB.getVertices()[k],
+                            polygonB.getVertices()[k + 1]
+                    ))) {
+                        if (polygonA.getBoundingRectangle().width < polygonB.getBoundingRectangle().width) {
+                            collisionPolygons.removeValue(polygonA, false);
+                            return true;
+                        } else if (polygonA.getBoundingRectangle().width > polygonB.getBoundingRectangle().width) {
+                            collisionPolygons.removeValue(polygonB, false);
+                            return true;
+                        }
+                        break jLoop;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
 
@@ -234,9 +270,9 @@ public class ShapeDrawer {
         float[] points = new float[closedShape.size * 2];
 
         int i = 0;
-        for (Polyline polyline2 : closedShape) {
-            points[i] = polyline2.getOriginX();
-            points[i + 1] = polyline2.getOriginY();
+        for (Polyline polyline : closedShape) {
+            points[i] = polyline.getOriginX();
+            points[i + 1] = polyline.getOriginY();
             i += 2;
         }
 
