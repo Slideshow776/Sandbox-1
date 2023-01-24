@@ -1,7 +1,10 @@
 package no.sandramoen.drawingGame.actors;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Polyline;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.RunnableAction;
@@ -22,8 +25,11 @@ public class Player extends BaseActor {
         centerAtPosition(x, y);
 
         collisionBox = new BaseActor(0, 0, stage);
-        collisionBox.setSize(getWidth() * .4f, getHeight() * .2f);
-        collisionBox.setX(collisionBox.getWidth() * .75f);
+        collisionBox.setSize(Gdx.graphics.getWidth() * .0025f, Gdx.graphics.getHeight() * .0025f);
+        collisionBox.setPosition(
+                getWidth() / 2 - collisionBox.getWidth() / 2,
+                getHeight() / 2 - collisionBox.getHeight() / 2
+        );
         collisionBox.setBoundaryRectangle();
         collisionBox.setDebug(true);
         addActor(collisionBox);
@@ -34,6 +40,20 @@ public class Player extends BaseActor {
         addAction(Actions.after(runnableAction));
     }
 
+    public BaseActor getCollisionBox() {
+        collisionBox.setPosition(
+                getX() + getWidth() / 2 - collisionBox.getWidth() / 2,
+                getY() + getHeight() / 2 - collisionBox.getHeight() / 2
+        );
+        return collisionBox;
+    }
+
+    public void die() {
+        setOrigin(Align.bottom);
+        clearActions();
+        addAction(Actions.scaleTo(1, 0, .5f));
+    }
+
     private void moveAlongPolylines(Array<Polyline> polylines) {
         for (Polyline polyline : polylines) {
             addAction(Actions.after(Actions.moveTo(
@@ -42,11 +62,5 @@ public class Player extends BaseActor {
                     SPEED)
             ));
         }
-    }
-
-    public void die() {
-        setOrigin(Align.bottom);
-        clearActions();
-        addAction(Actions.scaleTo(1, 0, .5f));
     }
 }

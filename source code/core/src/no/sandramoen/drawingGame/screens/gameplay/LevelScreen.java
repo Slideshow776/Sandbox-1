@@ -78,11 +78,13 @@ public class LevelScreen extends BaseScreen {
         spriteBatch = new SpriteBatch();
 
         // Gdx.input.setCursorCatched(true);
+
+        System.out.println("\nrestart\n");
     }
 
     @Override
     public void update(float delta) {
-        if (shapeDrawer.isCollisionDetected(player))
+        if (shapeDrawer.isCollisionDetected(player.getCollisionBox()))
             player.die();
     }
 
@@ -156,7 +158,7 @@ public class LevelScreen extends BaseScreen {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        endTurn(false);
+        endTurn();
         return super.touchUp(screenX, screenY, pointer, button);
     }
 
@@ -167,12 +169,11 @@ public class LevelScreen extends BaseScreen {
         if (isOutOfBounds(worldCoordinates))
             return super.touchDragged(screenX, screenY, pointer);
 
-        if (isPlaying && shapeDrawer.isItPossibleToDrawNewSegment(touchDownPoint, new Vector2(worldCoordinates.x, worldCoordinates.y))) {
-            boolean isClosedShape = shapeDrawer.drawNewLineSegment(touchDownPoint, new Vector2(worldCoordinates.x, worldCoordinates.y));
-
-            updateStaminaBar();
-            if (isClosedShape)
-                endTurn(true);
+        if (isPlaying) {
+            if (shapeDrawer.isEnoughDistanceToDrawNewSegment(touchDownPoint, new Vector2(worldCoordinates.x, worldCoordinates.y))) {
+                shapeDrawer.drawNewLineSegment(touchDownPoint, new Vector2(worldCoordinates.x, worldCoordinates.y));
+                updateStaminaBar();
+            }
         }
 
         return super.touchDragged(screenX, screenY, pointer);
@@ -197,15 +198,19 @@ public class LevelScreen extends BaseScreen {
         }
     }
 
-    private void endTurn(boolean isClosedShape) {
+    private void endTurn() {
         if (isPlaying) {
             RunnableAction doThisAfter = Actions.run(() -> {
                 staminaBar.reset();
-                if (isClosedShape) {
-                    shapeDrawer.addCollisionPolygon();
+                /*if (isClosedShape) {*/
+                shapeDrawer.checkIfClosedShape();
+                collisionDetection();/*
+                shapeDrawer.addCollisionPolygon();*/
+                shapeDrawer.reset();
+                    /*shapeDrawer.addCollisionPolygon();
                     shapeDrawer.addTriangles();
-                    collisionDetection();
-                }
+                    */
+                /*}*/
             });
             player.move(shapeDrawer.polylines, doThisAfter);
             resetTurn();
@@ -214,7 +219,6 @@ public class LevelScreen extends BaseScreen {
 
     private void resetTurn() {
         isPlaying = false;
-        shapeDrawer.reset();
         touchDownPoint.set(0, 0);
         spawnRandomFish();
         fishLabel.setText("Remaining fishes: " + fishes.size);

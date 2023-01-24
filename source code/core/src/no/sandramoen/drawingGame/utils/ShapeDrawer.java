@@ -3,7 +3,6 @@ package no.sandramoen.drawingGame.utils;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.EarClippingTriangulator;
-import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Polyline;
@@ -16,13 +15,13 @@ import no.sandramoen.drawingGame.actors.Box;
 import no.sandramoen.drawingGame.actors.utils.BaseActor;
 
 public class ShapeDrawer {
-    public final int MAX_POLY_LINES = 60;
+    public final int MAX_POLY_LINES = 160;
     public Array<Polyline> polylines;
     public Array<Polygon> triangles;
     public Array<Polyline> closedShape;
     public Array<Polygon> collisionPolygons;
 
-    private final float DISTANCE_BETWEEN_POLYLINES = Gdx.graphics.getWidth() * .01f;
+    private final float DISTANCE_BETWEEN_POLYLINES = Gdx.graphics.getWidth() * .008f;
     private Array<Box> collisionBoxes;
     private Polygon collisionPolygon;
     private Stage stage;
@@ -39,16 +38,16 @@ public class ShapeDrawer {
         closedShape = new Array();
     }
 
-    public boolean isItPossibleToDrawNewSegment(Vector2 start, Vector2 end) {
+    public boolean isEnoughDistanceToDrawNewSegment(Vector2 start, Vector2 end) {
         if (polylines.size < MAX_POLY_LINES && isEnoughDistance(start, end))
             return true;
         return false;
     }
 
-    public boolean drawNewLineSegment(Vector2 start, Vector2 end) {
+    public void drawNewLineSegment(Vector2 start, Vector2 end) {
         addPolyLine(start, end);
-        collisionBoxes.add(drawPolyLine(polylines.peek(), Color.DARK_GRAY, 1f, false));
-        return checkIfClosedShape();
+        collisionBoxes.add(drawPolyLine(polylines.peek(), Color.DARK_GRAY, 1f, false));/*
+        return checkIfClosedShape();*/
     }
 
     public void addTriangles() {
@@ -65,8 +64,8 @@ public class ShapeDrawer {
     }
 
     public boolean isCollisionDetected(BaseActor baseActor) {
-        return collisionByShape(collisionPolygons, baseActor);
-        // return collisionByTriangles(baseActor);
+        // return collisionByShape(collisionPolygons, baseActor);
+        return collisionByTriangles(baseActor);
     }
 
     public boolean isCollisionDetectedOnLastDrawnShape(BaseActor baseActor) {
@@ -122,7 +121,7 @@ public class ShapeDrawer {
 
 
     private boolean collisionByTriangles(BaseActor baseActor) {
-        if (triangles != null) // collision by triangles
+        if (triangles != null)
             for (Polygon triangle : triangles) {
                 if (
                         triangle.contains(baseActor.getX(), baseActor.getY()) ||
@@ -135,10 +134,13 @@ public class ShapeDrawer {
     private boolean collisionByShape(Array<Polygon> collisionPolygons, BaseActor baseActor) {
         for (Polygon polygon : collisionPolygons)
             if (
-                    polygon.contains(new Vector2(baseActor.getX(), baseActor.getY())) &&
-                            polygon.contains(new Vector2(baseActor.getX(), baseActor.getY() + baseActor.getHeight())) &&
-                            polygon.contains(new Vector2(baseActor.getX() + baseActor.getWidth(), baseActor.getY() + baseActor.getHeight())) &&
-                            polygon.contains(new Vector2(baseActor.getX() + baseActor.getWidth(), baseActor.getY()))
+                    polygon != null &&
+                            (
+                                    polygon.contains(new Vector2(baseActor.getX(), baseActor.getY())) &&
+                                            polygon.contains(new Vector2(baseActor.getX(), baseActor.getY() + baseActor.getHeight())) &&
+                                            polygon.contains(new Vector2(baseActor.getX() + baseActor.getWidth(), baseActor.getY() + baseActor.getHeight())) &&
+                                            polygon.contains(new Vector2(baseActor.getX() + baseActor.getWidth(), baseActor.getY()))
+                            )
             )
                 return true;
         return false;
@@ -160,31 +162,42 @@ public class ShapeDrawer {
     }
 
 
-    private boolean checkIfClosedShape() {
+    public void checkIfClosedShape() {
         if (polylines.size < 3)
-            return false;
+            return;
 
-        for (int i = 0; i < polylines.size - 1; i++) {
-            if (isIndexTwoLastPlacesInArray(polylines, i)) {
-                continue;
-            } else if (collisionBoxes.peek().overlaps(collisionBoxes.get(i))) {
-                triangulate(getClosedShape(i));
-                return true;
+        for (int i = 2; i < collisionBoxes.size; i++) {
+            for (int j = 2; j < collisionBoxes.size; j++) {
+
+                // don't collide with self
+                if (collisionBoxes.get(i) == collisionBoxes.get(j))
+                    continue;
+
+                // don't collide with neighbors
+                if (i == j + 1 || i == j - 1)
+                    continue;
+
+                // collide with everything else
+                if (collisionBoxes.get(i).overlaps(collisionBoxes.get(j))) {
+                    triangulate(getClosedShape(i, j));
+
+                    // only check that closed shape once
+                    if (i < j)
+                        i = j;
+                    else if (j < i)
+                        j = i;
+                }
             }
         }
-        return false;
     }
 
-    private boolean isIndexTwoLastPlacesInArray(Array array, int index) {
-        if (array.get(array.size - 1) == array.get(index) || array.get(array.size - 2) == array.get(index))
-            return true;
-        return false;
-    }
-
-    private Array<Polyline> getClosedShape(int i) {
+    private Array<Polyline> getClosedShape(int i, int j) {
         Array<Polyline> closedShape = new Array();
-        for (int j = 0; j < polylines.size - i - 1; j++)
-            closedShape.add(polylines.get(i + j));
+        for (int k = Math.min(i, j); k < Math.max(i, j); k++)
+            closedShape.add(polylines.get(k));
+
+        if (closedShape.isEmpty())
+            Gdx.app.error(getClass().getSimpleName(), "getClosedShape => failed to create array => i: " + i + ", j: " + j);
         return closedShape;
     }
 
@@ -254,6 +267,7 @@ public class ShapeDrawer {
         closedShape = closeTheShape(openShape);
         ShortArray triangles = computeTriangles(closedShape);
         constructTriangles(closedShape, triangles);
+        addTriangles();
     }
 
     private Array<Polyline> closeTheShape(Array<Polyline> openShape) {
