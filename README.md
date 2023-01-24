@@ -174,6 +174,9 @@ Read on below for project specifics.
 
 * Implemented in [this commit](https://github.com/Slideshow776/Sandbox-1/commit/4fe9886aa040796c5cb44c872b11f8b9c6c48b30).
 
+### Fresh water fishes in norway
+These are the available [fresh water fishes in norway](https://snl.no/ferskvannsfisker_i_Norge).
+
 ## Other
 
 For other project specifics check out the [commits](https://github.com/Slideshow776/Sandbox-1/commits/main).
