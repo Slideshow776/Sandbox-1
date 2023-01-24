@@ -1,7 +1,7 @@
 # Sandbox-1
 
 What will this become? Some sort of a game?
-![game 1](https://user-images.githubusercontent.com/4059636/214014215-49bba214-b858-4bc0-988a-a059886dbc44.gif)
+![game 2](https://user-images.githubusercontent.com/4059636/214311445-34bb7c87-ff1c-4f18-bb29-0b7b31154eb0.gif)
 
 Read on below for project specifics.
 
@@ -173,6 +173,9 @@ Read on below for project specifics.
 * Libgdx's documentation on masking, and an [explanatory video](https://www.youtube.com/watch?v=qDKmcNFFFng&t=613s).
 
 * Implemented in [this commit](https://github.com/Slideshow776/Sandbox-1/commit/4fe9886aa040796c5cb44c872b11f8b9c6c48b30).
+
+### Fresh water fishes in norway
+These are the available [fresh water fishes in norway](https://snl.no/ferskvannsfisker_i_Norge).
 
 ## Other
 
