@@ -18,7 +18,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 
+import no.sandramoen.drawingGame.actors.Basket;
 import no.sandramoen.drawingGame.actors.Fish;
+import no.sandramoen.drawingGame.actors.Gjedde;
 import no.sandramoen.drawingGame.actors.Ice;
 import no.sandramoen.drawingGame.actors.Player;
 import no.sandramoen.drawingGame.actors.Water;
@@ -32,15 +34,19 @@ import no.sandramoen.drawingGame.utils.ShapeDrawer;
 import com.github.tommyettinger.textra.TypingLabel;
 
 public class LevelScreen extends BaseScreen {
-    private boolean isPlaying;
+    private boolean isDrawing;
+    private boolean isGameOver;
+    private boolean isGettingFish;
     private Vector2 touchDownPoint;
 
     private ShapeDrawer shapeDrawer;
 
     private Array<Fish> fishes;
+    private int numLevelFishes;
     private Player player;
+    private Gjedde gjedda;
+    private Basket basket;
     private int numTurns;
-    private Array<BaseActor> waterTriangles;
 
     private TypingLabel fishLabel;
     private TypingLabel turnLabel;
@@ -62,12 +68,19 @@ public class LevelScreen extends BaseScreen {
         water = new Water(0, 0, groundStage);
 
         fishes = new Array();
-        for (int i = 0; i < 3; i++)
-            spawnRandomFish();
+        /*for (int i = 0; i < 3; i++)
+            spawnRandomFish();*/
 
-        player = new Player(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .5f, mainStage);
+        fishes.add(new Fish(200, 200, groundStage, true));
+        fishes.add(new Fish(500, 300, groundStage, true));
+        fishes.add(new Fish(900, 600, groundStage, true));
+        numLevelFishes = fishes.size;
 
-        waterTriangles = new Array();
+        gjedda = new Gjedde(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() * 3 / 4, groundStage);
+
+        player = new Player(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .05f, mainStage);
+        basket = new Basket(0, 0, mainStage);
+        basket.centerAtActor(player);
 
         initializeGUI();
 
@@ -84,8 +97,15 @@ public class LevelScreen extends BaseScreen {
 
     @Override
     public void update(float delta) {
-        if (shapeDrawer.isCollisionDetected(player.getCollisionBox()))
+        if (shapeDrawer.isCollisionDetected(player.getCollisionBox()) && !player.isDead) {
             player.die();
+            System.out.println("You fell in the water!");
+        }
+
+        if (player.getCollisionBox().overlaps(gjedda) && !player.isDead) {
+            System.out.println("Gjedda got you!");
+            player.die();
+        }
     }
 
     @Override
@@ -150,7 +170,7 @@ public class LevelScreen extends BaseScreen {
                 new Vector2(player.getX() + player.getWidth() / 2, player.getY() + player.getHeight() / 2),
                 Gdx.graphics.getWidth() * .04f)
         ) {
-            isPlaying = true;
+            isDrawing = true;
             touchDownPoint.set(worldCoordinates.x, worldCoordinates.y);
         }
         return super.touchDown(screenX, screenY, pointer, button);
@@ -169,7 +189,7 @@ public class LevelScreen extends BaseScreen {
         if (isOutOfBounds(worldCoordinates))
             return super.touchDragged(screenX, screenY, pointer);
 
-        if (isPlaying) {
+        if (isDrawing) {
             if (shapeDrawer.isEnoughDistanceToDrawNewSegment(touchDownPoint, new Vector2(worldCoordinates.x, worldCoordinates.y))) {
                 shapeDrawer.drawNewLineSegment(touchDownPoint, new Vector2(worldCoordinates.x, worldCoordinates.y));
                 updateStaminaBar();
@@ -190,27 +210,36 @@ public class LevelScreen extends BaseScreen {
 
     private void collisionDetection() {
         for (BaseActor fish : fishes) {
-            if (shapeDrawer.isCollisionDetectedOnLastDrawnShape(fish)) {
-                RunnableAction removeFromList = Actions.run(() -> fishes.removeValue((Fish) fish, false));
+            if (shapeDrawer.isCollisionDetectedOnLastDrawnShapes(fish)) {
+                isGettingFish = true;
+                RunnableAction removeFromList = Actions.run(() -> {
+                    fishes.removeValue((Fish) fish, false);
+                    isGettingFish = false;
+                });
                 ((Fish) fish).fadeAndRemove(removeFromList);
                 fishLabel.setText("{FASTER}Remaining fishes: " + (fishes.size - 1));
             }
         }
+
+        basket.addAction(Actions.sequence(
+                Actions.delay(2),
+                Actions.run(() -> {
+                    if (!isGettingFish && player.overlaps(basket) && numLevelFishes - fishes.size > 0 && !isGameOver) {
+                        isGameOver = true;
+                        pause();
+                        System.out.println("level complete! You got " + (numLevelFishes - fishes.size) + " out of " + numLevelFishes + " fishes..");
+                    }
+                })
+        ));
     }
 
     private void endTurn() {
-        if (isPlaying) {
+        if (isDrawing) {
             RunnableAction doThisAfter = Actions.run(() -> {
                 staminaBar.reset();
-                /*if (isClosedShape) {*/
                 shapeDrawer.checkIfClosedShape();
-                collisionDetection();/*
-                shapeDrawer.addCollisionPolygon();*/
+                collisionDetection();
                 shapeDrawer.reset();
-                    /*shapeDrawer.addCollisionPolygon();
-                    shapeDrawer.addTriangles();
-                    */
-                /*}*/
             });
             player.move(shapeDrawer.polylines, doThisAfter);
             resetTurn();
@@ -218,9 +247,9 @@ public class LevelScreen extends BaseScreen {
     }
 
     private void resetTurn() {
-        isPlaying = false;
+        isDrawing = false;
         touchDownPoint.set(0, 0);
-        spawnRandomFish();
+        /*spawnRandomFish();*/
         fishLabel.setText("Remaining fishes: " + fishes.size);
         turnLabel.setText("Turns: " + ++numTurns);
     }
@@ -235,7 +264,8 @@ public class LevelScreen extends BaseScreen {
             fishes.add(new Fish(
                     MathUtils.random(0, Gdx.graphics.getWidth()),
                     MathUtils.random(0, Gdx.graphics.getHeight()),
-                    groundStage
+                    groundStage,
+                    true
             ));
     }
 

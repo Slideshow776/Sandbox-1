@@ -13,14 +13,15 @@ import no.sandramoen.drawingGame.actors.utils.BaseActor;
 public class Fish extends BaseActor {
     public boolean isRemoved;
 
-    private boolean isFrozen = MathUtils.randomBoolean();
+    private boolean isFrozen;
     private final float ACCELERATION = 500;
     private final float MAX_MOVEMENT_SPEED = 50;
     private float changeDirectionCounter;
     private final float CHANGE_DIRECTION_FREQUENCY = 2;
 
-    public Fish(float x, float y, Stage stage) {
+    public Fish(float x, float y, Stage stage, boolean isFrozen) {
         super(x, y, stage);
+        this.isFrozen = isFrozen;
         loadImage("whitePixel");
         setColor(Color.BLACK);
         setSize(50f, 20f);
@@ -30,9 +31,12 @@ public class Fish extends BaseActor {
 
         setBoundaryRectangle();
 
-        setAcceleration(ACCELERATION);
-        setMaxSpeed(MAX_MOVEMENT_SPEED);
-        setDeceleration(ACCELERATION);
+        if (!isFrozen) {
+            MathUtils.randomBoolean();
+            setAcceleration(ACCELERATION);
+            setMaxSpeed(MAX_MOVEMENT_SPEED);
+            setDeceleration(ACCELERATION);
+        }
     }
 
     @Override
@@ -67,12 +71,12 @@ public class Fish extends BaseActor {
 
     private void keepInsideScreen() {
         if (getX() > Gdx.graphics.getWidth())
-            setRotation(180);
+            addAction(Actions.rotateTo(180, 1f));
         else if (getX() < 0)
-            setRotation(0);
+            addAction(Actions.rotateTo(0, 1f));
         if (getY() > Gdx.graphics.getHeight())
-            setRotation(270);
+            addAction(Actions.rotateTo(270, 1f));
         else if (getY() < 0)
-            setRotation(90);
+            addAction(Actions.rotateTo(90, 1f));
     }
 }

@@ -14,6 +14,8 @@ import com.badlogic.gdx.utils.Array;
 import no.sandramoen.drawingGame.actors.utils.BaseActor;
 
 public class Player extends BaseActor {
+    public boolean isDead;
+
     private final float SPEED = .035f;
     private BaseActor collisionBox;
 
@@ -23,6 +25,7 @@ public class Player extends BaseActor {
         setColor(Color.MAGENTA);
         setSize(40f, 65f);
         centerAtPosition(x, y);
+        setBoundaryRectangle();
 
         collisionBox = new BaseActor(0, 0, stage);
         collisionBox.setSize(Gdx.graphics.getWidth() * .0025f, Gdx.graphics.getHeight() * .0025f);
@@ -31,7 +34,7 @@ public class Player extends BaseActor {
                 getHeight() / 2 - collisionBox.getHeight() / 2
         );
         collisionBox.setBoundaryRectangle();
-        collisionBox.setDebug(true);
+        /*collisionBox.setDebug(true);*/
         addActor(collisionBox);
     }
 
@@ -49,6 +52,7 @@ public class Player extends BaseActor {
     }
 
     public void die() {
+        isDead = true;
         setOrigin(Align.bottom);
         clearActions();
         addAction(Actions.scaleTo(1, 0, .5f));

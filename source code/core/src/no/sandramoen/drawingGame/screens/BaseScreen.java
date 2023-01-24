@@ -14,6 +14,7 @@ public abstract class BaseScreen implements Screen, InputProcessor {
     protected Stage mainStage;
     protected Stage uiStage;
     protected Table uiTable;
+    private boolean pause;
 
     public BaseScreen() {
         groundStage = new Stage();
@@ -38,9 +39,11 @@ public abstract class BaseScreen implements Screen, InputProcessor {
     @Override
     public void render(float delta) {
         uiStage.act(delta);
-        mainStage.act(delta);
-        groundStage.act(delta);
-        update(delta);
+        if (!pause) {
+            mainStage.act(delta);
+            groundStage.act(delta);
+            update(delta);
+        }
 
         Gdx.gl.glClearColor(0.035f, 0.039f, 0.078f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -126,10 +129,12 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 
     @Override
     public void pause() {
+        pause = true;
     }
 
     @Override
     public void resume() {
+        pause = false;
     }
 
     @Override

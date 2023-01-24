@@ -15,15 +15,16 @@ import no.sandramoen.drawingGame.actors.Box;
 import no.sandramoen.drawingGame.actors.utils.BaseActor;
 
 public class ShapeDrawer {
-    public final int MAX_POLY_LINES = 160;
+    public final int MAX_POLY_LINES = 200;
     public Array<Polyline> polylines;
     public Array<Polygon> triangles;
     public Array<Polyline> closedShape;
     public Array<Polygon> collisionPolygons;
 
-    private final float DISTANCE_BETWEEN_POLYLINES = Gdx.graphics.getWidth() * .008f;
+    private final float DISTANCE_BETWEEN_POLYLINES = Gdx.graphics.getWidth() * .005f;
     private Array<Box> collisionBoxes;
     private Polygon collisionPolygon;
+    private Array<Polygon> lastDrawnShapes;
     private Stage stage;
     private Array<Polygon> trianglesToBeAdded;
 
@@ -36,6 +37,7 @@ public class ShapeDrawer {
         triangles = new Array();
         trianglesToBeAdded = new Array();
         closedShape = new Array();
+        lastDrawnShapes = new Array();
     }
 
     public boolean isEnoughDistanceToDrawNewSegment(Vector2 start, Vector2 end) {
@@ -68,10 +70,8 @@ public class ShapeDrawer {
         return collisionByTriangles(baseActor);
     }
 
-    public boolean isCollisionDetectedOnLastDrawnShape(BaseActor baseActor) {
-        Array<Polygon> temp = new Array();
-        temp.add(collisionPolygon);
-        return collisionByShape(temp, baseActor);
+    public boolean isCollisionDetectedOnLastDrawnShapes(BaseActor baseActor) {
+        return collisionByShape(lastDrawnShapes, baseActor);
     }
 
     public void reset() {
@@ -163,6 +163,7 @@ public class ShapeDrawer {
 
 
     public void checkIfClosedShape() {
+        lastDrawnShapes.clear();
         if (polylines.size < 3)
             return;
 
@@ -291,6 +292,7 @@ public class ShapeDrawer {
         }
 
         collisionPolygon = new Polygon(points);
+        lastDrawnShapes.add(new Polygon(points));
 
         EarClippingTriangulator earClippingTriangulator = new EarClippingTriangulator();
         return earClippingTriangulator.computeTriangles(points);
