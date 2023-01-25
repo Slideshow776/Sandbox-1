@@ -14,6 +14,5 @@ public class Basket extends BaseActor {
         centerAtPosition(x, y);
         setColor(Color.LIME);
         setBoundaryRectangle();
-        setDebug(true);
     }
 }

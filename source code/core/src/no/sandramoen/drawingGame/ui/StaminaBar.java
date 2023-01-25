@@ -35,7 +35,7 @@ public class StaminaBar extends BaseActor {
         addActor(label);
     }
 
-    public void decrement(float percent) {
+    public void set(float percent) {
         progress.addAction(Actions.sizeTo(getWidth() * percent, getHeight(), .1f));
     }
 

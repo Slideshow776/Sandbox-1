@@ -25,6 +25,7 @@ import no.sandramoen.drawingGame.actors.Ice;
 import no.sandramoen.drawingGame.actors.Player;
 import no.sandramoen.drawingGame.actors.Water;
 import no.sandramoen.drawingGame.actors.utils.BaseActor;
+import no.sandramoen.drawingGame.ui.Speedometer;
 import no.sandramoen.drawingGame.ui.StaminaBar;
 import no.sandramoen.drawingGame.utils.BaseGame;
 import no.sandramoen.drawingGame.screens.BaseScreen;
@@ -51,12 +52,16 @@ public class LevelScreen extends BaseScreen {
     private TypingLabel fishLabel;
     private TypingLabel turnLabel;
     private StaminaBar staminaBar;
+    private Speedometer speedometer;
 
     private ShapeRenderer shapeRenderer;
     private SpriteBatch spriteBatch;
 
     private BaseActor water;
     private BaseActor ice;
+
+    private Vector2 lastTouchDragged;
+    private float touchDraggedDistance;
 
     @Override
     public void initialize() {
@@ -78,9 +83,10 @@ public class LevelScreen extends BaseScreen {
 
         gjedda = new Gjedde(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() * 3 / 4, groundStage);
 
-        player = new Player(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .05f, mainStage);
         basket = new Basket(0, 0, mainStage);
+        player = new Player(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .05f, mainStage);
         basket.centerAtActor(player);
+        lastTouchDragged = new Vector2(player.getX(), player.getY());
 
         initializeGUI();
 
@@ -97,15 +103,7 @@ public class LevelScreen extends BaseScreen {
 
     @Override
     public void update(float delta) {
-        if (shapeDrawer.isCollisionDetected(player.getCollisionBox()) && !player.isDead) {
-            player.die();
-            System.out.println("You fell in the water!");
-        }
-
-        if (player.getCollisionBox().overlaps(gjedda) && !player.isDead) {
-            System.out.println("Gjedda got you!");
-            player.die();
-        }
+        checkLooseConditions();
     }
 
     @Override
@@ -188,11 +186,11 @@ public class LevelScreen extends BaseScreen {
 
         if (isOutOfBounds(worldCoordinates))
             return super.touchDragged(screenX, screenY, pointer);
-
         if (isDrawing) {
             if (shapeDrawer.isEnoughDistanceToDrawNewSegment(touchDownPoint, new Vector2(worldCoordinates.x, worldCoordinates.y))) {
                 shapeDrawer.drawNewLineSegment(touchDownPoint, new Vector2(worldCoordinates.x, worldCoordinates.y));
                 updateStaminaBar();
+                updateSpeedometer(worldCoordinates);
             }
         }
 
@@ -222,7 +220,7 @@ public class LevelScreen extends BaseScreen {
         }
 
         basket.addAction(Actions.sequence(
-                Actions.delay(2),
+                Actions.delay(Fish.REMOVE_TIME * 1.1f),
                 Actions.run(() -> {
                     if (!isGettingFish && player.overlaps(basket) && numLevelFishes - fishes.size > 0 && !isGameOver) {
                         isGameOver = true;
@@ -248,6 +246,7 @@ public class LevelScreen extends BaseScreen {
 
     private void resetTurn() {
         isDrawing = false;
+        speedometer.setZero();
         touchDownPoint.set(0, 0);
         /*spawnRandomFish();*/
         fishLabel.setText("Remaining fishes: " + fishes.size);
@@ -256,7 +255,13 @@ public class LevelScreen extends BaseScreen {
 
     private void updateStaminaBar() {
         float percent = (shapeDrawer.MAX_POLY_LINES - shapeDrawer.polylines.size) / (float) shapeDrawer.MAX_POLY_LINES;
-        staminaBar.decrement(percent);
+        staminaBar.set(percent);
+    }
+
+    private void updateSpeedometer(Vector3 worldCoordinates) {
+        touchDraggedDistance = new Vector2(worldCoordinates.x, worldCoordinates.y).sub(lastTouchDragged).len();
+        speedometer.set(GameUtils.normalizeValue(touchDraggedDistance, 0, 110));
+        lastTouchDragged.set(worldCoordinates.x, worldCoordinates.y);
     }
 
     private void spawnRandomFish() {
@@ -268,7 +273,6 @@ public class LevelScreen extends BaseScreen {
                     true
             ));
     }
-
 
     private void drawOutlinesAroundHolesInIce() {
         shapeRenderer.begin();
@@ -289,8 +293,21 @@ public class LevelScreen extends BaseScreen {
         return false;
     }
 
+    private void checkLooseConditions() {
+        if (shapeDrawer.isCollisionDetected(player.getCollisionBox()) && !player.isDead) {
+            player.die();
+            System.out.println("You fell in the water!");
+        }
+
+        if (player.getCollisionBox().overlaps(gjedda) && !player.isDead) {
+            System.out.println("Gjedda got you!");
+            player.die();
+        }
+    }
+
     private void initializeGUI() {
         staminaBar = new StaminaBar(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .98f, uiStage);
+        speedometer = new Speedometer(Gdx.graphics.getWidth() * .85f, Gdx.graphics.getHeight() * .98f, uiStage);
 
         fishLabel = new TypingLabel("{FASTER}Remaining fishes: " + fishes.size, new Label.LabelStyle(BaseGame.mySkin.get("arcade26", BitmapFont.class), null));
         fishLabel.setColor(Color.FOREST);

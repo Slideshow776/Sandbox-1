@@ -12,6 +12,7 @@ import no.sandramoen.drawingGame.actors.utils.BaseActor;
 
 public class Fish extends BaseActor {
     public boolean isRemoved;
+    public static final float REMOVE_TIME = 1f;
 
     private boolean isFrozen;
     private final float ACCELERATION = 500;
@@ -52,7 +53,7 @@ public class Fish extends BaseActor {
 
     public void fadeAndRemove(RunnableAction removeFromList) {
         addAction(Actions.sequence(
-                Actions.fadeOut(1f),
+                Actions.fadeOut(REMOVE_TIME),
                 removeFromList,
                 Actions.run(() -> {
                     isRemoved = true;
