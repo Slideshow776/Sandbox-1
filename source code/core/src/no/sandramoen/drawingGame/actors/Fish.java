@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.RunnableAction;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
 
 import no.sandramoen.drawingGame.actors.utils.BaseActor;
 
@@ -19,10 +20,13 @@ public class Fish extends BaseActor {
     private final float MAX_MOVEMENT_SPEED = 50;
     private float changeDirectionCounter;
     private final float CHANGE_DIRECTION_FREQUENCY = 2;
+    private Array<ImpassableTerrain> impassables;
 
-    public Fish(float x, float y, Stage stage, boolean isFrozen) {
+    public Fish(float x, float y, Stage stage, boolean isFrozen, Array<ImpassableTerrain> impassables) {
         super(x, y, stage);
         this.isFrozen = isFrozen;
+        this.impassables = impassables;
+
         loadImage("whitePixel");
         setColor(Color.BLACK);
         setSize(50f, 20f);
@@ -48,6 +52,9 @@ public class Fish extends BaseActor {
             keepInsideScreen();
             accelerateAtAngle(getRotation());
             applyPhysics(delta);
+
+            for (ImpassableTerrain impassableTerrain : impassables)
+                preventOverlap(impassableTerrain);
         }
     }
 

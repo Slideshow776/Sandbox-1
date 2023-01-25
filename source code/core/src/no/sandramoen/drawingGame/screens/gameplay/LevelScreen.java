@@ -74,15 +74,16 @@ public class LevelScreen extends BaseScreen {
         ice = new Ice(0, 0, groundStage);
         new Water(0, 0, groundStage);
 
-        fishes = new Array();
-        fishes.add(new Fish(200, 200, groundStage, true));
-        fishes.add(new Fish(500, 300, groundStage, true));
-        fishes.add(new Fish(900, 600, groundStage, true));
-        numLevelFishes = fishes.size;
-        gjedda = new Gjedde(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() * 3 / 4, groundStage);
-
         impassables = new Array();
         impassables.add(new ImpassableTerrain(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .5f, 100, 100, mainStage));
+
+        fishes = new Array();
+        fishes.add(new Fish(200, 200, groundStage, true, impassables));
+        fishes.add(new Fish(500, 300, groundStage, true, impassables));
+        fishes.add(new Fish(900, 600, groundStage, true, impassables));
+        numLevelFishes = fishes.size;
+        gjedda = new Gjedde(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() * 3 / 4, groundStage, impassables);
+
         basket = new Basket(0, 0, mainStage);
         player = new Player(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .05f, mainStage);
         basket.centerAtActor(player);
