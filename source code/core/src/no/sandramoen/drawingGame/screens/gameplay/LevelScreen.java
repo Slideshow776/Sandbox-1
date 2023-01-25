@@ -22,6 +22,7 @@ import no.sandramoen.drawingGame.actors.Basket;
 import no.sandramoen.drawingGame.actors.Fish;
 import no.sandramoen.drawingGame.actors.Gjedde;
 import no.sandramoen.drawingGame.actors.Ice;
+import no.sandramoen.drawingGame.actors.ImpassableTerrain;
 import no.sandramoen.drawingGame.actors.Player;
 import no.sandramoen.drawingGame.actors.Water;
 import no.sandramoen.drawingGame.actors.utils.BaseActor;
@@ -47,7 +48,8 @@ public class LevelScreen extends BaseScreen {
     private Player player;
     private Gjedde gjedda;
     private Basket basket;
-    private int numTurns;
+    private BaseActor ice;
+    private Array<ImpassableTerrain> impassables;
 
     private TypingLabel fishLabel;
     private TypingLabel turnLabel;
@@ -57,11 +59,9 @@ public class LevelScreen extends BaseScreen {
     private ShapeRenderer shapeRenderer;
     private SpriteBatch spriteBatch;
 
-    private BaseActor water;
-    private BaseActor ice;
-
-    private Vector2 lastTouchDragged;
+    private int numTurns;
     private float touchDraggedDistance;
+    private Vector2 lastTouchDragged;
 
     @Override
     public void initialize() {
@@ -70,19 +70,17 @@ public class LevelScreen extends BaseScreen {
         shapeDrawer = new ShapeDrawer(mainStage);
 
         ice = new Ice(0, 0, groundStage);
-        water = new Water(0, 0, groundStage);
+        new Water(0, 0, groundStage);
 
         fishes = new Array();
-        /*for (int i = 0; i < 3; i++)
-            spawnRandomFish();*/
-
         fishes.add(new Fish(200, 200, groundStage, true));
         fishes.add(new Fish(500, 300, groundStage, true));
         fishes.add(new Fish(900, 600, groundStage, true));
         numLevelFishes = fishes.size;
-
         gjedda = new Gjedde(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() * 3 / 4, groundStage);
 
+        impassables = new Array();
+        impassables.add(new ImpassableTerrain(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .5f, 100, 100, mainStage));
         basket = new Basket(0, 0, mainStage);
         player = new Player(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .05f, mainStage);
         basket.centerAtActor(player);
@@ -186,6 +184,12 @@ public class LevelScreen extends BaseScreen {
 
         if (isOutOfBounds(worldCoordinates))
             return super.touchDragged(screenX, screenY, pointer);
+
+        if (isOnImpassableTerrain(worldCoordinates)) {
+            touchUp(screenX, screenY, pointer, 0);
+            return super.touchDragged(screenX, screenY, pointer);
+        }
+
         if (isDrawing) {
             if (shapeDrawer.isEnoughDistanceToDrawNewSegment(touchDownPoint, new Vector2(worldCoordinates.x, worldCoordinates.y))) {
                 shapeDrawer.drawNewLineSegment(touchDownPoint, new Vector2(worldCoordinates.x, worldCoordinates.y));
@@ -260,18 +264,8 @@ public class LevelScreen extends BaseScreen {
 
     private void updateSpeedometer(Vector3 worldCoordinates) {
         touchDraggedDistance = new Vector2(worldCoordinates.x, worldCoordinates.y).sub(lastTouchDragged).len();
-        speedometer.set(GameUtils.normalizeValue(touchDraggedDistance, 0, 110));
+        speedometer.set(GameUtils.normalizeValue(touchDraggedDistance, 0, 80));
         lastTouchDragged.set(worldCoordinates.x, worldCoordinates.y);
-    }
-
-    private void spawnRandomFish() {
-        if (fishes.size < 3)
-            fishes.add(new Fish(
-                    MathUtils.random(0, Gdx.graphics.getWidth()),
-                    MathUtils.random(0, Gdx.graphics.getHeight()),
-                    groundStage,
-                    true
-            ));
     }
 
     private void drawOutlinesAroundHolesInIce() {
@@ -293,6 +287,13 @@ public class LevelScreen extends BaseScreen {
         return false;
     }
 
+    private boolean isOnImpassableTerrain(Vector3 worldCoordinates) {
+        for (ImpassableTerrain impassableTerrain : impassables)
+            if (impassableTerrain.getBoundaryPolygon().contains(new Vector2(worldCoordinates.x, worldCoordinates.y)))
+                return true;
+        return false;
+    }
+
     private void checkLooseConditions() {
         if (shapeDrawer.isCollisionDetected(player.getCollisionBox()) && !player.isDead) {
             player.die();
@@ -300,6 +301,10 @@ public class LevelScreen extends BaseScreen {
         }
 
         if (player.getCollisionBox().overlaps(gjedda) && !player.isDead) {
+            for (ImpassableTerrain impassableTerrain : impassables) {
+                if (player.overlaps(impassableTerrain))
+                    return;
+            }
             System.out.println("Gjedda got you!");
             player.die();
         }
