@@ -232,16 +232,20 @@ public class LevelScreen extends BaseScreen {
             }
         }
 
-        basket.addAction(Actions.sequence(
-                Actions.delay(Fish.REMOVE_TIME * 1.1f),
-                Actions.run(() -> {
-                    if (!isGettingFish && player.overlaps(basket) && numLevelFishes - fishes.size > 0 && !isGameOver) {
-                        isGameOver = true;
-                        pause();
-                        System.out.println("level complete! You got " + (numLevelFishes - fishes.size) + " out of " + numLevelFishes + " fishes..");
-                    }
-                })
-        ));
+        if (shapeDrawer.isCollisionDetected(basket))
+            basket.die();
+
+        if (!basket.isDead)
+            basket.addAction(Actions.sequence(
+                    Actions.delay(Fish.REMOVE_TIME * 1.1f),
+                    Actions.run(() -> {
+                        if (!isGettingFish && player.overlaps(basket) && numLevelFishes - fishes.size > 0 && !isGameOver) {
+                            isGameOver = true;
+                            pause();
+                            System.out.println("level complete! You got " + (numLevelFishes - fishes.size) + " out of " + numLevelFishes + " fishes..");
+                        }
+                    })
+            ));
     }
 
     private void endTurn() {
