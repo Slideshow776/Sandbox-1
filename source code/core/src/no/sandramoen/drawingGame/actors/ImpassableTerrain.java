@@ -13,6 +13,5 @@ public class ImpassableTerrain extends BaseActor {
         setSize(width, height);
         centerAtPosition(x, y);
         setBoundaryRectangle();
-        setDebug(true);
     }
 }

@@ -26,6 +26,7 @@ import no.sandramoen.drawingGame.actors.ImpassableTerrain;
 import no.sandramoen.drawingGame.actors.Player;
 import no.sandramoen.drawingGame.actors.Water;
 import no.sandramoen.drawingGame.actors.utils.BaseActor;
+import no.sandramoen.drawingGame.ui.CancelDrawing;
 import no.sandramoen.drawingGame.ui.Speedometer;
 import no.sandramoen.drawingGame.ui.StaminaBar;
 import no.sandramoen.drawingGame.utils.BaseGame;
@@ -53,6 +54,7 @@ public class LevelScreen extends BaseScreen {
 
     private TypingLabel fishLabel;
     private TypingLabel turnLabel;
+    private CancelDrawing cancelDrawing;
     private StaminaBar staminaBar;
     private Speedometer speedometer;
 
@@ -167,6 +169,7 @@ public class LevelScreen extends BaseScreen {
                 Gdx.graphics.getWidth() * .04f)
         ) {
             isDrawing = true;
+            cancelDrawing.addAction(Actions.alpha(1, 1f));
             touchDownPoint.set(worldCoordinates.x, worldCoordinates.y);
         }
         return super.touchDown(screenX, screenY, pointer, button);
@@ -180,17 +183,23 @@ public class LevelScreen extends BaseScreen {
 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
-        Vector3 worldCoordinates = groundStage.getCamera().unproject(new Vector3(screenX, screenY, 0f));
-
-        if (isOutOfBounds(worldCoordinates))
-            return super.touchDragged(screenX, screenY, pointer);
-
-        if (isOnImpassableTerrain(worldCoordinates)) {
-            touchUp(screenX, screenY, pointer, 0);
-            return super.touchDragged(screenX, screenY, pointer);
-        }
-
         if (isDrawing) {
+            Vector3 worldCoordinates = groundStage.getCamera().unproject(new Vector3(screenX, screenY, 0f));
+
+            if (isOutOfBounds(worldCoordinates))
+                return super.touchDragged(screenX, screenY, pointer);
+
+            if (isOnImpassableTerrain(worldCoordinates)) {
+                touchUp(screenX, screenY, pointer, 0);
+                return super.touchDragged(screenX, screenY, pointer);
+            }
+
+            if (cancelDrawing.getBoundaryPolygon().contains(new Vector2(worldCoordinates.x, worldCoordinates.y))) {
+                isDrawing = false;
+                shapeDrawer.reset();
+                return super.touchDragged(screenX, screenY, pointer);
+            }
+
             if (shapeDrawer.isEnoughDistanceToDrawNewSegment(touchDownPoint, new Vector2(worldCoordinates.x, worldCoordinates.y))) {
                 shapeDrawer.drawNewLineSegment(touchDownPoint, new Vector2(worldCoordinates.x, worldCoordinates.y));
                 updateStaminaBar();
@@ -252,9 +261,9 @@ public class LevelScreen extends BaseScreen {
         isDrawing = false;
         speedometer.setZero();
         touchDownPoint.set(0, 0);
-        /*spawnRandomFish();*/
         fishLabel.setText("Remaining fishes: " + fishes.size);
         turnLabel.setText("Turns: " + ++numTurns);
+        cancelDrawing.addAction(Actions.alpha(.25f, 1f));
     }
 
     private void updateStaminaBar() {
@@ -311,6 +320,7 @@ public class LevelScreen extends BaseScreen {
     }
 
     private void initializeGUI() {
+        cancelDrawing = new CancelDrawing(Gdx.graphics.getWidth() * .1f, Gdx.graphics.getHeight() * .98f, uiStage);
         staminaBar = new StaminaBar(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .98f, uiStage);
         speedometer = new Speedometer(Gdx.graphics.getWidth() * .85f, Gdx.graphics.getHeight() * .98f, uiStage);
 

@@ -49,8 +49,7 @@ public class ShapeDrawer {
 
     public void drawNewLineSegment(Vector2 start, Vector2 end) {
         addPolyLine(start, end);
-        collisionBoxes.add(drawPolyLine(polylines.peek(), Color.DARK_GRAY, 1f, false));/*
-        return checkIfClosedShape();*/
+        collisionBoxes.add(drawPolyLine(polylines.peek(), Color.DARK_GRAY, 1f, false));
     }
 
     public void addTriangles() {
@@ -76,9 +75,8 @@ public class ShapeDrawer {
     }
 
     public void reset() {
+        polylines.clear();
         clearBoxes(collisionBoxes);
-        polylines.clear();/*
-        triangles = null;*/
     }
 
     public void addCollisionPolygon() {
