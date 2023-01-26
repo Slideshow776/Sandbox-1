@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.RunnableAction;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 
+import no.sandramoen.drawingGame.actors.map.ImpassableTerrain;
 import no.sandramoen.drawingGame.actors.utils.BaseActor;
 
 public class Fish extends BaseActor {

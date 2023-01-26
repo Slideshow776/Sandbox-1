@@ -10,15 +10,15 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public abstract class BaseScreen implements Screen, InputProcessor {
-    protected Stage groundStage;
+    protected Stage waterStage;
     protected Stage mainStage;
     protected Stage uiStage;
     protected Table uiTable;
     private boolean pause;
 
     public BaseScreen() {
-        groundStage = new Stage();
-        groundStage.setViewport(new ScreenViewport());
+        waterStage = new Stage();
+        waterStage.setViewport(new ScreenViewport());
 
         mainStage = new Stage();
         mainStage.setViewport(new ScreenViewport());
@@ -41,14 +41,14 @@ public abstract class BaseScreen implements Screen, InputProcessor {
         uiStage.act(delta);
         if (!pause) {
             mainStage.act(delta);
-            groundStage.act(delta);
+            waterStage.act(delta);
             update(delta);
         }
 
         Gdx.gl.glClearColor(0.035f, 0.039f, 0.078f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        groundStage.getViewport().apply();
+        waterStage.getViewport().apply();
         drawGroundStage(delta);
 
         mainStage.getViewport().apply();
@@ -59,7 +59,7 @@ public abstract class BaseScreen implements Screen, InputProcessor {
     }
 
     public void drawGroundStage(float delta) {
-        groundStage.draw();
+        waterStage.draw();
     }
 
     @Override
@@ -68,7 +68,7 @@ public abstract class BaseScreen implements Screen, InputProcessor {
         im.addProcessor(this);
         im.addProcessor(uiStage);
         im.addProcessor(mainStage);
-        im.addProcessor(groundStage);
+        im.addProcessor(waterStage);
     }
 
     @Override
@@ -77,12 +77,12 @@ public abstract class BaseScreen implements Screen, InputProcessor {
         im.removeProcessor(this);
         im.removeProcessor(uiStage);
         im.removeProcessor(mainStage);
-        im.removeProcessor(groundStage);
+        im.removeProcessor(waterStage);
     }
 
     @Override
     public void resize(int width, int height) {
-        groundStage.getViewport().update(width, height, true);
+        waterStage.getViewport().update(width, height, true);
         mainStage.getViewport().update(width, height, true);
         uiStage.getViewport().update(width, height, true);
     }

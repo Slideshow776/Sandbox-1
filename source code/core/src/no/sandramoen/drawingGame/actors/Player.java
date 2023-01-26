@@ -24,7 +24,6 @@ public class Player extends BaseActor {
         loadImage("whitePixel");
         setColor(Color.MAGENTA);
         setSize(40f, 65f);
-        centerAtPosition(x, y);
         setBoundaryRectangle();
 
         collisionBox = new BaseActor(0, 0, stage);

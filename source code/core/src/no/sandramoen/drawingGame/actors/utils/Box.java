@@ -1,4 +1,4 @@
-package no.sandramoen.drawingGame.actors;
+package no.sandramoen.drawingGame.actors.utils;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;

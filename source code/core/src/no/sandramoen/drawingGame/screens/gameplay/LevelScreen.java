@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -20,11 +19,12 @@ import com.badlogic.gdx.utils.Array;
 
 import no.sandramoen.drawingGame.actors.Basket;
 import no.sandramoen.drawingGame.actors.Fish;
-import no.sandramoen.drawingGame.actors.Gjedde;
-import no.sandramoen.drawingGame.actors.Ice;
-import no.sandramoen.drawingGame.actors.ImpassableTerrain;
+import no.sandramoen.drawingGame.actors.Gjedda;
+import no.sandramoen.drawingGame.actors.map.Ice;
+import no.sandramoen.drawingGame.actors.map.ImpassableTerrain;
 import no.sandramoen.drawingGame.actors.Player;
-import no.sandramoen.drawingGame.actors.Water;
+import no.sandramoen.drawingGame.actors.map.TilemapActor;
+import no.sandramoen.drawingGame.actors.map.Water;
 import no.sandramoen.drawingGame.actors.utils.BaseActor;
 import no.sandramoen.drawingGame.ui.CancelDrawing;
 import no.sandramoen.drawingGame.ui.Speedometer;
@@ -47,7 +47,7 @@ public class LevelScreen extends BaseScreen {
     private Array<Fish> fishes;
     private int numLevelFishes;
     private Player player;
-    private Gjedde gjedda;
+    private Gjedda gjedda;
     private Basket basket;
     private BaseActor ice;
     private Array<ImpassableTerrain> impassables;
@@ -60,6 +60,7 @@ public class LevelScreen extends BaseScreen {
 
     private ShapeRenderer shapeRenderer;
     private SpriteBatch spriteBatch;
+    private TilemapActor tilemap;
 
     private int numTurns;
     private float touchDraggedDistance;
@@ -67,39 +68,21 @@ public class LevelScreen extends BaseScreen {
 
     @Override
     public void initialize() {
+        // system
         touchDownPoint = new Vector2();
-
         shapeDrawer = new ShapeDrawer(mainStage);
-
-        ice = new Ice(0, 0, groundStage);
-        new Water(0, 0, groundStage);
-
-        impassables = new Array();
-        impassables.add(new ImpassableTerrain(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .5f, 100, 100, mainStage));
-
-        fishes = new Array();
-        fishes.add(new Fish(200, 200, groundStage, true, impassables));
-        fishes.add(new Fish(500, 300, groundStage, true, impassables));
-        fishes.add(new Fish(900, 600, groundStage, true, impassables));
-        numLevelFishes = fishes.size;
-        gjedda = new Gjedde(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() * 3 / 4, groundStage, impassables);
-
-        basket = new Basket(0, 0, mainStage);
-        player = new Player(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .05f, mainStage);
-        basket.centerAtActor(player);
-        lastTouchDragged = new Vector2(player.getX(), player.getY());
-
-        initializeGUI();
-
+        tilemap = new TilemapActor(BaseGame.testMap, mainStage);
         shapeRenderer = new ShapeRenderer();
         shapeRenderer.setAutoShapeType(true);
         Gdx.gl20.glLineWidth(2);
-
         spriteBatch = new SpriteBatch();
-
-        // Gdx.input.setCursorCatched(true);
-
         System.out.println("\nrestart\n");
+        initializeActors();
+
+        lastTouchDragged = new Vector2(player.getX(), player.getY());
+
+        // GUI
+        initializeGUI();
     }
 
     @Override
@@ -163,7 +146,7 @@ public class LevelScreen extends BaseScreen {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        Vector3 worldCoordinates = groundStage.getCamera().unproject(new Vector3(screenX, screenY, 0f));
+        Vector3 worldCoordinates = waterStage.getCamera().unproject(new Vector3(screenX, screenY, 0f));
         if (GameUtils.isWithinDistance(
                 new Vector2(worldCoordinates.x, worldCoordinates.y),
                 new Vector2(player.getX() + player.getWidth() / 2, player.getY() + player.getHeight() / 2),
@@ -185,7 +168,7 @@ public class LevelScreen extends BaseScreen {
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         if (isDrawing) {
-            Vector3 worldCoordinates = groundStage.getCamera().unproject(new Vector3(screenX, screenY, 0f));
+            Vector3 worldCoordinates = waterStage.getCamera().unproject(new Vector3(screenX, screenY, 0f));
 
             if (isOutOfBounds(worldCoordinates))
                 return super.touchDragged(screenX, screenY, pointer);
@@ -322,6 +305,23 @@ public class LevelScreen extends BaseScreen {
             System.out.println("Gjedda got you!");
             player.die();
         }
+    }
+
+    private void initializeActors() {
+        // actors
+        fishes = new Array();
+        impassables = new Array();
+
+        ice = new Ice(0, 0, waterStage);
+        new Water(0, 0, waterStage);
+
+        MapLoader mapLoader = new MapLoader(mainStage, waterStage, tilemap, player, gjedda, basket, fishes, impassables);
+        player = mapLoader.player;
+        impassables = mapLoader.impassables;
+        gjedda = mapLoader.gjedda;
+        fishes = mapLoader.fishes;
+        numLevelFishes = fishes.size;
+        basket = mapLoader.basket;
     }
 
     private void initializeGUI() {

@@ -9,6 +9,8 @@ import com.badlogic.gdx.assets.AssetErrorListener;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 import no.sandramoen.drawingGame.screens.BaseScreen;
@@ -27,7 +29,7 @@ public abstract class BaseGame extends Game implements AssetErrorListener {
     public static String defaultShader;
     public static String shockwaveShader;
 
-    // public static TiledMap testMap;
+    public static TiledMap testMap;
 
     // public static Music menuMusic;
 
@@ -41,9 +43,6 @@ public abstract class BaseGame extends Game implements AssetErrorListener {
     public static float voiceVolume = 1f;
     public static float soundVolume = .5f;
     public static float musicVolume = .1f;
-    public static float unitScale = .0621f;
-
-    // public static Color redColor = new Color(0.647f, 0.188f, 0.188f, 1f);
 
     public BaseGame() {
         game = this;
@@ -107,8 +106,8 @@ public abstract class BaseGame extends Game implements AssetErrorListener {
         // assetManager.load("audio/sound/370220__eflexmusic__pistol-shot-close-mixed.wav", Sound.class);
 
         // tiled maps
-        /*assetManager.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
-        assetManager.load("maps/test.tmx", TiledMap.class);*/
+        assetManager.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
+        assetManager.load("maps/test.tmx", TiledMap.class);
 
         assetManager.finishLoading();
 
@@ -123,7 +122,7 @@ public abstract class BaseGame extends Game implements AssetErrorListener {
         // pistolShotSound = assetManager.get("audio/sound/370220__eflexmusic__pistol-shot-close-mixed.wav", Sound.class);
 
         // tiled maps
-        // testMap = assetManager.get("maps/test.tmx", TiledMap.class);
+        testMap = assetManager.get("maps/test.tmx", TiledMap.class);
 
         textureAtlas = assetManager.get("images/included/packed/images.pack.atlas");
         GameUtils.printLoadingTime(getClass().getSimpleName(),"Assetmanager", startTime);

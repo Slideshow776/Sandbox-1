@@ -161,8 +161,8 @@ public class BaseActor extends Group {
     public void setAnimation(Animation<TextureRegion> anim) {
         animation = anim;
         TextureRegion tr = animation.getKeyFrame(0);
-        float w = tr.getRegionWidth() * BaseGame.unitScale;
-        float h = tr.getRegionHeight() * BaseGame.unitScale;
+        float w = tr.getRegionWidth();
+        float h = tr.getRegionHeight();
         setSize(w, h);
         setOrigin(w / 2, h / 2);
 
