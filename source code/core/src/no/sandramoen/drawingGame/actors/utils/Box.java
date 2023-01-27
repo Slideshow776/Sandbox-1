@@ -14,7 +14,7 @@ public class Box extends BaseActor {
 
         loadImage("whitePixel");
         setColor(Color.GREEN);
-        setSize(12.5f, 12.5f);
+        setSize(1f, 1f);
         centerAtPosition(x, y);
 
         setBoundaryRectangle();

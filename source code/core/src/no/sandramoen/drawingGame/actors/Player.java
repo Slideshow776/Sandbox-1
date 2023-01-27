@@ -23,19 +23,25 @@ public class Player extends BaseActor {
         super(x, y, stage);
         loadImage("whitePixel");
         setColor(Color.MAGENTA);
-        setSize(40f, 65f);
+        setSize(2, 4);
         setBoundaryRectangle();
 
         collisionBox = new BaseActor(0, 0, stage);
-        collisionBox.setSize(Gdx.graphics.getWidth() * .0025f, Gdx.graphics.getHeight() * .0025f);
+        collisionBox.setSize(1 / 2f, 1 / 2f);
         collisionBox.setPosition(
                 getWidth() / 2 - collisionBox.getWidth() / 2,
-                getHeight() / 2 - collisionBox.getHeight() / 2
+                getHeight() / 3 - collisionBox.getHeight() / 2
         );
         collisionBox.setBoundaryRectangle();
-        /*collisionBox.setDebug(true);*/
+        // collisionBox.setDebug(true);
         addActor(collisionBox);
     }
+
+    /*@Override
+    public void act(float delta) {
+        super.act(delta);
+        alignCamera(getX(), getY(), .1f);
+    }*/
 
     public void move(Array<Polyline> polylines, RunnableAction runnableAction) {
         moveAlongPolylines(polylines);

@@ -7,6 +7,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public abstract class BaseScreen implements Screen, InputProcessor {
@@ -18,10 +19,10 @@ public abstract class BaseScreen implements Screen, InputProcessor {
 
     public BaseScreen() {
         waterStage = new Stage();
-        waterStage.setViewport(new ScreenViewport());
+        waterStage.setViewport(new ExtendViewport(80, 45));
 
         mainStage = new Stage();
-        mainStage.setViewport(new ScreenViewport());
+        mainStage.setViewport(new ExtendViewport(80, 45));
 
         uiTable = new Table();
         uiTable.setFillParent(true);
@@ -49,7 +50,7 @@ public abstract class BaseScreen implements Screen, InputProcessor {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         waterStage.getViewport().apply();
-        drawGroundStage(delta);
+        drawWaterStage(delta);
 
         mainStage.getViewport().apply();
         mainStage.draw();
@@ -58,7 +59,7 @@ public abstract class BaseScreen implements Screen, InputProcessor {
         uiStage.draw();
     }
 
-    public void drawGroundStage(float delta) {
+    public void drawWaterStage(float delta) {
         waterStage.draw();
     }
 

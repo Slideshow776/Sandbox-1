@@ -1,61 +1,74 @@
 
 images.pack.png
-size: 256, 256
+size: 512, 256
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
 UI_cancel
   rotate: false
-  xy: 2, 2
+  xy: 82, 50
   size: 33, 33
   orig: 33, 33
   offset: 0, 0
   index: -1
 button
   rotate: false
-  xy: 2, 37
+  xy: 2, 5
   size: 78, 78
   orig: 78, 78
   offset: 0, 0
   index: -1
 button-pressed
   rotate: false
-  xy: 132, 167
+  xy: 260, 151
   size: 78, 78
   orig: 78, 78
   offset: 0, 0
   index: -1
 iceTest
   rotate: false
-  xy: 2, 117
-  size: 128, 128
-  orig: 128, 128
+  xy: 2, 85
+  size: 256, 144
+  orig: 256, 144
   offset: 0, 0
   index: -1
 whitePixel
   rotate: false
-  xy: 82, 114
+  xy: 2, 2
   size: 1, 1
   orig: 1, 1
   offset: 0, 0
   index: -1
 
 images.pack2.png
+size: 128, 64
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+actors/fish/gjedda
+  rotate: false
+  xy: 2, 2
+  size: 64, 32
+  orig: 64, 32
+  offset: 0, 0
+  index: -1
+
+images.pack3.png
 size: 1024, 1024
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
 water/waterTest0
   rotate: false
-  xy: 2, 364
-  size: 720, 360
-  orig: 720, 360
+  xy: 2, 409
+  size: 720, 405
+  orig: 720, 405
   offset: 0, 0
   index: -1
 water/waterTest1
   rotate: false
   xy: 2, 2
-  size: 720, 360
-  orig: 720, 360
+  size: 720, 405
+  orig: 720, 405
   offset: 0, 0
   index: -1

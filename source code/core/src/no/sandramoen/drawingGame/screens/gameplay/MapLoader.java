@@ -11,6 +11,7 @@ import no.sandramoen.drawingGame.actors.Gjedda;
 import no.sandramoen.drawingGame.actors.Player;
 import no.sandramoen.drawingGame.actors.map.ImpassableTerrain;
 import no.sandramoen.drawingGame.actors.map.TilemapActor;
+import no.sandramoen.drawingGame.utils.BaseGame;
 
 public class MapLoader {
     public Player player;
@@ -46,8 +47,8 @@ public class MapLoader {
     private void initializeFish() {
         for (MapObject obj : tilemap.getTileList("actors", "fish")) {
             MapProperties props = obj.getProperties();
-            float x = props.get("x", Float.class);
-            float y = props.get("y", Float.class);
+            float x = props.get("x", Float.class) * BaseGame.UNIT_SCALE;
+            float y = props.get("y", Float.class) * BaseGame.UNIT_SCALE;
             boolean isFrozen = props.get("isFrozen", Boolean.class);
             fishes.add(new Fish(x, y, waterStage, isFrozen, impassables));
         }
@@ -56,32 +57,32 @@ public class MapLoader {
     private void initializeImpassables() {
         for (MapObject obj : tilemap.getTileList("actors", "impassable")) {
             MapProperties props = obj.getProperties();
-            float x = props.get("x", Float.class);
-            float y = props.get("y", Float.class);
-            float width = props.get("width", Float.class);
-            float height = props.get("height", Float.class);
+            float x = props.get("x", Float.class) * BaseGame.UNIT_SCALE;
+            float y = props.get("y", Float.class) * BaseGame.UNIT_SCALE;
+            float width = props.get("width", Float.class) * BaseGame.UNIT_SCALE;
+            float height = props.get("height", Float.class) * BaseGame.UNIT_SCALE;
             impassables.add(new ImpassableTerrain(x, y, width, height, mainStage));
         }
     }
 
     private void initializeGjedda() {
         MapObject startPoint = tilemap.getTileList("actors", "gjedda").get(0);
-        float x = startPoint.getProperties().get("x", Float.class);
-        float y = startPoint.getProperties().get("y", Float.class);
+        float x = startPoint.getProperties().get("x", Float.class) * BaseGame.UNIT_SCALE;
+        float y = startPoint.getProperties().get("y", Float.class) * BaseGame.UNIT_SCALE;
         gjedda = new Gjedda(x, y, waterStage, impassables);
     }
 
     private void initializeBasket() {
         MapObject startPoint = tilemap.getTileList("actors", "basket").get(0);
-        float x = startPoint.getProperties().get("x", Float.class);
-        float y = startPoint.getProperties().get("y", Float.class);
+        float x = startPoint.getProperties().get("x", Float.class) * BaseGame.UNIT_SCALE;
+        float y = startPoint.getProperties().get("y", Float.class) * BaseGame.UNIT_SCALE;
         basket = new Basket(x, y, mainStage);
     }
 
     private void initializePlayer() {
         MapObject startPoint = tilemap.getTileList("actors", "player").get(0);
-        float x = startPoint.getProperties().get("x", Float.class);
-        float y = startPoint.getProperties().get("y", Float.class);
+        float x = startPoint.getProperties().get("x", Float.class) * BaseGame.UNIT_SCALE;
+        float y = startPoint.getProperties().get("y", Float.class) * BaseGame.UNIT_SCALE;
         player = new Player(x, y, mainStage);
     }
 }

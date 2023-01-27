@@ -1,5 +1,6 @@
 package no.sandramoen.drawingGame.actors.map;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -22,15 +23,24 @@ import no.sandramoen.drawingGame.actors.Player;
 import no.sandramoen.drawingGame.utils.BaseGame;
 
 public class TilemapActor extends Actor {
+    public static float mapWidth;
+    public static float mapHeight;
+
     private TiledMap tiledMap;
     private OrthoCachedTiledMapRenderer tiledMapRenderer;
 
     public TilemapActor(TiledMap tiledMap, Stage stage) {
         this.tiledMap = tiledMap;
-        tiledMapRenderer = new OrthoCachedTiledMapRenderer(this.tiledMap);
+        tiledMapRenderer = new OrthoCachedTiledMapRenderer(this.tiledMap, BaseGame.UNIT_SCALE);
         tiledMapRenderer.setBlending(true);
+
+        /*centerPositionCamera(
+                (OrthographicCamera) stage.getCamera(),
+                calculateCenterOfMap()
+        );*/
+
+        setMapSize();
         stage.addActor(this);
-        // centerPositionCamera(stage, calculateCenterOfMap());
     }
 
     public ArrayList<MapObject> getRectangleList(String propertyName) {
@@ -96,9 +106,8 @@ public class TilemapActor extends Actor {
         tiledMapRenderer.render();
     }
 
-    public void centerPositionCamera(Stage stage, Vector2 centerOfMap) {
-        OrthographicCamera camera = (OrthographicCamera) stage.getViewport().getCamera();
-        camera.zoom = 1.2f;
+    public void centerPositionCamera(OrthographicCamera camera, Vector2 centerOfMap) {
+        camera.zoom = 1f;
         camera.position.set(new Vector3(
                 centerOfMap.x,
                 centerOfMap.y,
@@ -107,13 +116,21 @@ public class TilemapActor extends Actor {
         camera.update();
     }
 
+    private void setMapSize() {
+        mapWidth = tiledMap.getProperties().get("width", Integer.class);
+        mapHeight = tiledMap.getProperties().get("height", Integer.class);
+    }
+
     private Vector2 calculateCenterOfMap() {
         int tileWidth = tiledMap.getProperties().get("tilewidth", Integer.class);
         int tileHeight = tiledMap.getProperties().get("tileheight", Integer.class);
         int numTilesHorizontal = tiledMap.getProperties().get("width", Integer.class);
         int numTilesVertical = tiledMap.getProperties().get("height", Integer.class);
-        int mapWidth = tileWidth * numTilesHorizontal;
-        int mapHeight = tileHeight * numTilesVertical;
+        mapWidth = tileWidth * numTilesHorizontal;
+        mapHeight = tileHeight * numTilesVertical;
+
+        System.out.println("center of map: (" + mapWidth / 2 + ", " + mapHeight / 2 + ")");
+        System.out.println("center of screen: (" + Gdx.graphics.getWidth() / 2 + ", " + Gdx.graphics.getHeight() / 2 + ")");
         return new Vector2(mapWidth / 2, mapHeight / 2);
     }
 }

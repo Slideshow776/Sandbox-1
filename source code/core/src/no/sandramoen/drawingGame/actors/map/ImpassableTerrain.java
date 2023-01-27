@@ -11,7 +11,6 @@ public class ImpassableTerrain extends BaseActor {
         loadImage("whitePixel");
         setColor(Color.DARK_GRAY);
         setSize(width, height);
-        centerAtPosition(x, y);
         setBoundaryRectangle();
     }
 }

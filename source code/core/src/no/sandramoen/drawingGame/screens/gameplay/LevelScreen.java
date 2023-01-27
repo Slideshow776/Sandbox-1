@@ -3,12 +3,7 @@ package no.sandramoen.drawingGame.screens.gameplay;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -41,6 +36,7 @@ public class LevelScreen extends BaseScreen {
     private boolean isGameOver;
     private boolean isGettingFish;
     private Vector2 touchDownPoint;
+    private final float MINIMUM_TOUCH_DISTANCE = 4f;
 
     private ShapeDrawer shapeDrawer;
 
@@ -58,8 +54,6 @@ public class LevelScreen extends BaseScreen {
     private StaminaBar staminaBar;
     private Speedometer speedometer;
 
-    private ShapeRenderer shapeRenderer;
-    private SpriteBatch spriteBatch;
     private TilemapActor tilemap;
 
     private int numTurns;
@@ -72,10 +66,6 @@ public class LevelScreen extends BaseScreen {
         touchDownPoint = new Vector2();
         shapeDrawer = new ShapeDrawer(mainStage);
         tilemap = new TilemapActor(BaseGame.testMap, mainStage);
-        shapeRenderer = new ShapeRenderer();
-        shapeRenderer.setAutoShapeType(true);
-        Gdx.gl20.glLineWidth(2);
-        spriteBatch = new SpriteBatch();
         System.out.println("\nrestart\n");
         initializeActors();
 
@@ -91,57 +81,10 @@ public class LevelScreen extends BaseScreen {
     }
 
     @Override
-    public void drawGroundStage(float delta) {
-        super.drawGroundStage(delta);
-        // drawOutlinesAroundHolesInIce();
-        drawMasks();
-        drawMasked(delta);
-    }
-
-    private void drawMasks() {
-        /* Clear our depth buffer info from previous frame. */
-        Gdx.gl.glClear(GL20.GL_DEPTH_BUFFER_BIT);
-
-        /* Set the depth function to LESS. */
-        Gdx.gl.glDepthFunc(GL20.GL_LESS);
-
-        /* Enable depth writing. */
-        Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-
-        /* Disable RGBA color writing. */
-        Gdx.gl.glColorMask(false, false, false, false);
-
-        /* Render mask elements. */
-        shapeRenderer.begin();
-        shapeRenderer.set(ShapeType.Filled);
-
-        if (!shapeDrawer.triangles.isEmpty())
-            for (Polygon polygon : shapeDrawer.triangles)
-                shapeRenderer.triangle(
-                        polygon.getVertices()[0],
-                        polygon.getVertices()[1],
-                        polygon.getVertices()[2],
-                        polygon.getVertices()[3],
-                        polygon.getVertices()[4],
-                        polygon.getVertices()[5]
-                );
-
-        shapeRenderer.flush();
-        shapeRenderer.end();
-    }
-
-    private void drawMasked(float delta) {
-        /* Enable RGBA color writing. */
-        Gdx.gl.glColorMask(true, true, true, true);
-
-        /* Set the depth function to LESS. */
-        Gdx.gl.glDepthFunc(GL20.GL_LESS);
-
-        /* Render masked elements. */
-        spriteBatch.begin();
-        spriteBatch.draw(ice.animation.getKeyFrame(delta), 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        spriteBatch.end();
-        Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
+    public void drawWaterStage(float delta) {
+        super.drawWaterStage(delta);
+        shapeDrawer.drawMasks(mainStage.getCamera());
+        shapeDrawer.drawMasked(delta, ice, mainStage.getCamera());
     }
 
     @Override
@@ -150,7 +93,7 @@ public class LevelScreen extends BaseScreen {
         if (GameUtils.isWithinDistance(
                 new Vector2(worldCoordinates.x, worldCoordinates.y),
                 new Vector2(player.getX() + player.getWidth() / 2, player.getY() + player.getHeight() / 2),
-                Gdx.graphics.getWidth() * .04f)
+                MINIMUM_TOUCH_DISTANCE)
         ) {
             isDrawing = true;
             cancelDrawing.addAction(Actions.alpha(1, 1f));
@@ -265,19 +208,11 @@ public class LevelScreen extends BaseScreen {
         lastTouchDragged.set(worldCoordinates.x, worldCoordinates.y);
     }
 
-    private void drawOutlinesAroundHolesInIce() {
-        shapeRenderer.begin();
-        shapeRenderer.setColor(Color.BLACK);
-        for (Polygon polygon : shapeDrawer.collisionPolygons)
-            shapeRenderer.polygon(polygon.getVertices());
-        shapeRenderer.end();
-    }
-
     private boolean isOutOfBounds(Vector3 worldCoordinates) {
         if (
-                worldCoordinates.x > Gdx.graphics.getWidth() ||
+                worldCoordinates.x > TilemapActor.mapWidth ||
                         worldCoordinates.x < 0 ||
-                        worldCoordinates.y > Gdx.graphics.getHeight() ||
+                        worldCoordinates.y > TilemapActor.mapHeight ||
                         worldCoordinates.y < 0
         )
             return true;

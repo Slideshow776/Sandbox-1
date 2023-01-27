@@ -161,8 +161,8 @@ public class BaseActor extends Group {
     public void setAnimation(Animation<TextureRegion> anim) {
         animation = anim;
         TextureRegion tr = animation.getKeyFrame(0);
-        float w = tr.getRegionWidth();
-        float h = tr.getRegionHeight();
+        float w = tr.getRegionWidth() * BaseGame.UNIT_SCALE;
+        float h = tr.getRegionHeight() * BaseGame.UNIT_SCALE;
         setSize(w, h);
         setOrigin(w / 2, h / 2);
 
@@ -257,19 +257,15 @@ public class BaseActor extends Group {
         }
     }
 
-    public void alignCamera(Vector2 target, float lerp) {
+    public void alignCamera(float targetX, float targetY, float lerp) {
         if (this.getStage() != null) {
             OrthographicCamera camera = (OrthographicCamera) this.getStage().getViewport().getCamera();
 
             // center camera on actor
-            /*camera.position.set(new Vector3(
-                    camera.position.x + (target.x + getOriginX() - camera.position.x) * lerp,
-                    camera.position.y + (target.y + getOriginY() - camera.position.y) * lerp,
-                    0f
-            ));*/
-
             camera.position.set(new Vector3(
-                    target.x, target.y, 0f
+                    camera.position.x + (targetX + getOriginX() - camera.position.x) * lerp,
+                    camera.position.y + (targetY + getOriginY() - camera.position.y) * lerp,
+                    0f
             ));
 
             /*bindCameraToWorld(camera);*/
@@ -314,7 +310,7 @@ public class BaseActor extends Group {
             OrthographicCamera camera = (OrthographicCamera) this.getStage().getCamera();
             for (Vector2 point : focalPoints) {
                 if (target.dst(point) < threshold) {
-                    alignCamera(point, lerp);
+                    alignCamera(point.x, point.y, lerp);
                     return true;
                 }
             }

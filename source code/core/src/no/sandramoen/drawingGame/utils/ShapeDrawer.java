@@ -1,7 +1,11 @@
 package no.sandramoen.drawingGame.utils;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
@@ -11,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ShortArray;
 
+import no.sandramoen.drawingGame.actors.map.TilemapActor;
 import no.sandramoen.drawingGame.actors.utils.Box;
 import no.sandramoen.drawingGame.actors.utils.BaseActor;
 
@@ -21,12 +26,14 @@ public class ShapeDrawer {
     public Array<Polyline> closedShape;
     public Array<Polygon> collisionPolygons;
 
-    private final float DISTANCE_BETWEEN_POLYLINES = Gdx.graphics.getWidth() * .005f;
+    private final float DISTANCE_BETWEEN_POLYLINES = 1 / 16f;
     private Array<Box> collisionBoxes;
     private Polygon collisionPolygon;
     private Array<Polygon> lastDrawnShapes;
     private Stage stage;
     private Array<Polygon> trianglesToBeAdded;
+    private ShapeRenderer shapeRenderer;
+    private SpriteBatch spriteBatch;
 
     public ShapeDrawer(Stage stage) {
         this.stage = stage;
@@ -38,6 +45,67 @@ public class ShapeDrawer {
         trianglesToBeAdded = new Array();
         closedShape = new Array();
         lastDrawnShapes = new Array();
+
+        shapeRenderer = new ShapeRenderer();
+        shapeRenderer.setAutoShapeType(true);
+        Gdx.gl20.glLineWidth(2);
+        spriteBatch = new SpriteBatch();
+    }
+
+    public void drawMasks(Camera camera) {
+        /* Clear our depth buffer info from previous frame. */
+        Gdx.gl.glClear(GL20.GL_DEPTH_BUFFER_BIT);
+
+        /* Set the depth function to LESS. */
+        Gdx.gl.glDepthFunc(GL20.GL_LESS);
+
+        /* Enable depth writing. */
+        Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+
+        /* Disable RGBA color writing. */
+        Gdx.gl.glColorMask(false, false, false, false);
+
+        /* Render mask elements. */
+        shapeRenderer.setProjectionMatrix(camera.combined);
+        shapeRenderer.begin();
+        shapeRenderer.set(ShapeRenderer.ShapeType.Filled);
+
+        if (!triangles.isEmpty())
+            for (Polygon polygon : triangles)
+                shapeRenderer.triangle(
+                        polygon.getVertices()[0],
+                        polygon.getVertices()[1],
+                        polygon.getVertices()[2],
+                        polygon.getVertices()[3],
+                        polygon.getVertices()[4],
+                        polygon.getVertices()[5]
+                );
+
+        shapeRenderer.flush();
+        shapeRenderer.end();
+    }
+
+    public void drawMasked(float delta, BaseActor baseActor, Camera camera) {
+        /* Enable RGBA color writing. */
+        Gdx.gl.glColorMask(true, true, true, true);
+
+        /* Set the depth function to LESS. */
+        Gdx.gl.glDepthFunc(GL20.GL_LESS);
+
+        /* Render masked elements. */
+        spriteBatch.setProjectionMatrix(camera.combined);
+        spriteBatch.begin();
+        spriteBatch.draw(baseActor.animation.getKeyFrame(delta), 0, 0, TilemapActor.mapWidth, TilemapActor.mapHeight);
+        spriteBatch.end();
+        Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
+    }
+
+    private void drawOutlinesAroundHolesInIce() {
+        shapeRenderer.begin();
+        shapeRenderer.setColor(Color.BLACK);
+        for (Polygon polygon : collisionPolygons)
+            shapeRenderer.polygon(polygon.getVertices());
+        shapeRenderer.end();
     }
 
     public boolean isEnoughDistanceToDrawNewSegment(Vector2 start, Vector2 end) {
@@ -48,7 +116,7 @@ public class ShapeDrawer {
 
     public void drawNewLineSegment(Vector2 start, Vector2 end) {
         addPolyLine(start, end);
-        collisionBoxes.add(drawPolyLine(polylines.peek(), Color.DARK_GRAY, 1f, false));
+        collisionBoxes.add(drawPolyLine(polylines.peek(), Color.GRAY, 1 / 8f, false));
     }
 
     public void addTriangles() {
@@ -213,7 +281,7 @@ public class ShapeDrawer {
             ));
 
         for (Polyline polyline : trianglePolylines)
-            drawPolyLine(polyline, color, 2, true);
+            drawPolyLine(polyline, color, 1 / 8f, true);
     }
 
     private Box drawPolyLine(Polyline polyline, Color color, float height, boolean fade) {

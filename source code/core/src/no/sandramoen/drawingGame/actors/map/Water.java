@@ -1,6 +1,5 @@
 package no.sandramoen.drawingGame.actors.map;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -14,7 +13,7 @@ public class Water extends BaseActor {
 
     public Water(float x, float y, Stage stage) {
         super(x, y, stage);
-        setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        setSize(TilemapActor.mapWidth, TilemapActor.mapHeight);
 
         animationImages.add(BaseGame.textureAtlas.findRegion("water/waterTest0"));/*
         animationImages.add(BaseGame.textureAtlas.findRegion("water/waterTest1"));*/

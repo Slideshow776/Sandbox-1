@@ -13,7 +13,7 @@ public class Basket extends BaseActor {
         super(x, y, stage);
 
         loadImage("whitePixel");
-        setSize(65f, 55f);
+        setSize(2f, 2f);
         centerAtPosition(x, y);
         setColor(Color.LIME);
         setBoundaryRectangle();

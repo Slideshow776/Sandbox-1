@@ -43,6 +43,7 @@ public abstract class BaseGame extends Game implements AssetErrorListener {
     public static float voiceVolume = 1f;
     public static float soundVolume = .5f;
     public static float musicVolume = .1f;
+    public static final float UNIT_SCALE = 1 / 16f;
 
     public BaseGame() {
         game = this;
