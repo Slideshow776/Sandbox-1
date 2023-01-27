@@ -1,10 +1,7 @@
 package no.sandramoen.drawingGame.actors;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Polyline;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.RunnableAction;
@@ -15,6 +12,7 @@ import no.sandramoen.drawingGame.actors.utils.BaseActor;
 
 public class Player extends BaseActor {
     public boolean isDead;
+    public boolean isMoving;
 
     private final float SPEED = .035f;
     private BaseActor collisionBox;
@@ -44,8 +42,10 @@ public class Player extends BaseActor {
     }*/
 
     public void move(Array<Polyline> polylines, RunnableAction runnableAction) {
+        isMoving = true;
         moveAlongPolylines(polylines);
         addAction(Actions.after(runnableAction));
+        addAction(Actions.after(Actions.run(() -> isMoving = false)));
     }
 
     public BaseActor getCollisionBox() {

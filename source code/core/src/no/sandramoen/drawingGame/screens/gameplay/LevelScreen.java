@@ -37,6 +37,7 @@ public class LevelScreen extends BaseScreen {
     private boolean isGettingFish;
     private Vector2 touchDownPoint;
     private final float MINIMUM_TOUCH_DISTANCE = 4f;
+    private final float MAXIMUM_TOUCH_DRAG_SPEED = 4f;
 
     private ShapeDrawer shapeDrawer;
 
@@ -90,10 +91,12 @@ public class LevelScreen extends BaseScreen {
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         Vector3 worldCoordinates = waterStage.getCamera().unproject(new Vector3(screenX, screenY, 0f));
-        if (GameUtils.isWithinDistance(
-                new Vector2(worldCoordinates.x, worldCoordinates.y),
-                new Vector2(player.getX() + player.getWidth() / 2, player.getY() + player.getHeight() / 2),
-                MINIMUM_TOUCH_DISTANCE)
+        if (
+                (GameUtils.isWithinDistance(
+                        new Vector2(worldCoordinates.x, worldCoordinates.y),
+                        new Vector2(player.getX() + player.getWidth() / 2, player.getY() + player.getHeight() / 2),
+                        MINIMUM_TOUCH_DISTANCE)
+                ) && !player.isMoving
         ) {
             isDrawing = true;
             cancelDrawing.addAction(Actions.alpha(1, 1f));
@@ -104,19 +107,22 @@ public class LevelScreen extends BaseScreen {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        endTurn();
+        Vector3 worldCoordinates = waterStage.getCamera().unproject(new Vector3(screenX, screenY, 0f));
+        boolean isTouchDragged = touchDownPoint.epsilonEquals(new Vector2(worldCoordinates.x, worldCoordinates.y));
+        if (!isTouchDragged)
+            endTurn();
         return super.touchUp(screenX, screenY, pointer, button);
     }
 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
-        if (isDrawing) {
+        if (isDrawing && !player.isMoving) {
             Vector3 worldCoordinates = waterStage.getCamera().unproject(new Vector3(screenX, screenY, 0f));
 
-            if (isOutOfBounds(worldCoordinates))
+            if (isTouchOutOfBounds(worldCoordinates))
                 return super.touchDragged(screenX, screenY, pointer);
 
-            if (isOnImpassableTerrain(worldCoordinates)) {
+            if (isTouchOnImpassableTerrain(worldCoordinates)) {
                 touchUp(screenX, screenY, pointer, 0);
                 return super.touchDragged(screenX, screenY, pointer);
             }
@@ -133,7 +139,6 @@ public class LevelScreen extends BaseScreen {
                 updateSpeedometer(worldCoordinates);
             }
         }
-
         return super.touchDragged(screenX, screenY, pointer);
     }
 
@@ -204,11 +209,11 @@ public class LevelScreen extends BaseScreen {
 
     private void updateSpeedometer(Vector3 worldCoordinates) {
         touchDraggedDistance = new Vector2(worldCoordinates.x, worldCoordinates.y).sub(lastTouchDragged).len();
-        speedometer.set(GameUtils.normalizeValue(touchDraggedDistance, 0, 80));
+        speedometer.set(GameUtils.normalizeValue(touchDraggedDistance, 0, MAXIMUM_TOUCH_DRAG_SPEED));
         lastTouchDragged.set(worldCoordinates.x, worldCoordinates.y);
     }
 
-    private boolean isOutOfBounds(Vector3 worldCoordinates) {
+    private boolean isTouchOutOfBounds(Vector3 worldCoordinates) {
         if (
                 worldCoordinates.x > TilemapActor.mapWidth ||
                         worldCoordinates.x < 0 ||
@@ -219,7 +224,7 @@ public class LevelScreen extends BaseScreen {
         return false;
     }
 
-    private boolean isOnImpassableTerrain(Vector3 worldCoordinates) {
+    private boolean isTouchOnImpassableTerrain(Vector3 worldCoordinates) {
         for (ImpassableTerrain impassableTerrain : impassables)
             if (impassableTerrain.getBoundaryPolygon().contains(new Vector2(worldCoordinates.x, worldCoordinates.y)))
                 return true;
@@ -243,13 +248,14 @@ public class LevelScreen extends BaseScreen {
     }
 
     private void initializeActors() {
-        // actors
         fishes = new Array();
         impassables = new Array();
-
         ice = new Ice(0, 0, waterStage);
         new Water(0, 0, waterStage);
+        loadActorsFromMap();
+    }
 
+    private void loadActorsFromMap() {
         MapLoader mapLoader = new MapLoader(mainStage, waterStage, tilemap, player, gjedda, basket, fishes, impassables);
         player = mapLoader.player;
         impassables = mapLoader.impassables;

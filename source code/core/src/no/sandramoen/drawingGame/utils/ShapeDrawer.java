@@ -20,31 +20,33 @@ import no.sandramoen.drawingGame.actors.utils.Box;
 import no.sandramoen.drawingGame.actors.utils.BaseActor;
 
 public class ShapeDrawer {
-    public final int MAX_POLY_LINES = 200;
+    public final int MAX_POLY_LINES = 100;
     public Array<Polyline> polylines;
-    public Array<Polygon> triangles;
-    public Array<Polyline> closedShape;
-    public Array<Polygon> collisionPolygons;
 
-    private final float DISTANCE_BETWEEN_POLYLINES = 1 / 16f;
-    private Array<Box> collisionBoxes;
+    private final float DISTANCE_BETWEEN_POLYLINES = .5f;
+
+    private Array<Box> lineSegmentBoxes;
+    private Array<Polygon> triangles;
+    private Array<Polygon> lastDrawnTriangles;
+    private Array<Polygon> collisionPolygons;
+    private Array<Polygon> lastDrawnPolygon;
+    private Array<Polyline> closedShape;
+
     private Polygon collisionPolygon;
-    private Array<Polygon> lastDrawnShapes;
     private Stage stage;
-    private Array<Polygon> trianglesToBeAdded;
     private ShapeRenderer shapeRenderer;
     private SpriteBatch spriteBatch;
 
     public ShapeDrawer(Stage stage) {
         this.stage = stage;
 
-        collisionBoxes = new Array();
+        lineSegmentBoxes = new Array();
         polylines = new Array();
         collisionPolygons = new Array();
         triangles = new Array();
-        trianglesToBeAdded = new Array();
+        lastDrawnTriangles = new Array();
         closedShape = new Array();
-        lastDrawnShapes = new Array();
+        lastDrawnPolygon = new Array();
 
         shapeRenderer = new ShapeRenderer();
         shapeRenderer.setAutoShapeType(true);
@@ -53,6 +55,9 @@ public class ShapeDrawer {
     }
 
     public void drawMasks(Camera camera) {
+        /* use the relative camera position, instead of the absolute screen position*/
+        shapeRenderer.setProjectionMatrix(camera.combined);
+
         /* Clear our depth buffer info from previous frame. */
         Gdx.gl.glClear(GL20.GL_DEPTH_BUFFER_BIT);
 
@@ -66,7 +71,6 @@ public class ShapeDrawer {
         Gdx.gl.glColorMask(false, false, false, false);
 
         /* Render mask elements. */
-        shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin();
         shapeRenderer.set(ShapeRenderer.ShapeType.Filled);
 
@@ -86,6 +90,9 @@ public class ShapeDrawer {
     }
 
     public void drawMasked(float delta, BaseActor baseActor, Camera camera) {
+        /* use the relative camera position, instead of the absolute screen position*/
+        spriteBatch.setProjectionMatrix(camera.combined);
+
         /* Enable RGBA color writing. */
         Gdx.gl.glColorMask(true, true, true, true);
 
@@ -93,19 +100,19 @@ public class ShapeDrawer {
         Gdx.gl.glDepthFunc(GL20.GL_LESS);
 
         /* Render masked elements. */
-        spriteBatch.setProjectionMatrix(camera.combined);
         spriteBatch.begin();
         spriteBatch.draw(baseActor.animation.getKeyFrame(delta), 0, 0, TilemapActor.mapWidth, TilemapActor.mapHeight);
         spriteBatch.end();
         Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
     }
 
-    private void drawOutlinesAroundHolesInIce() {
-        shapeRenderer.begin();
+    private void drawOutlinesAroundHolesInIce() { // TODO:
+        throw new java.lang.UnsupportedOperationException("Not supported yet.");
+        /*shapeRenderer.begin();
         shapeRenderer.setColor(Color.BLACK);
         for (Polygon polygon : collisionPolygons)
             shapeRenderer.polygon(polygon.getVertices());
-        shapeRenderer.end();
+        shapeRenderer.end();*/
     }
 
     public boolean isEnoughDistanceToDrawNewSegment(Vector2 start, Vector2 end) {
@@ -116,11 +123,11 @@ public class ShapeDrawer {
 
     public void drawNewLineSegment(Vector2 start, Vector2 end) {
         addPolyLine(start, end);
-        collisionBoxes.add(drawPolyLine(polylines.peek(), Color.GRAY, 1 / 8f, false));
+        lineSegmentBoxes.add(drawPolyLine(polylines.peek(), Color.GRAY, 1 / 8f, false));
     }
 
     public void addTriangles() {
-        for (Polygon triangle : trianglesToBeAdded)
+        for (Polygon triangle : lastDrawnTriangles)
             triangles.add(triangle);
     }
 
@@ -138,12 +145,12 @@ public class ShapeDrawer {
     }
 
     public boolean isCollisionDetectedOnLastDrawnShapes(BaseActor baseActor) {
-        return collisionByShape(lastDrawnShapes, baseActor);
+        return collisionByShape(lastDrawnPolygon, baseActor);
     }
 
     public void reset() {
         polylines.clear();
-        clearBoxes(collisionBoxes);
+        clearBoxes(lineSegmentBoxes);
     }
 
     public void addCollisionPolygon() {
@@ -229,15 +236,15 @@ public class ShapeDrawer {
 
 
     public void checkIfClosedShape() {
-        lastDrawnShapes.clear();
+        lastDrawnPolygon.clear();
         if (polylines.size < 3)
             return;
 
-        for (int i = 2; i < collisionBoxes.size; i++) {
-            for (int j = 2; j < collisionBoxes.size; j++) {
+        for (int i = 2; i < lineSegmentBoxes.size; i++) {
+            for (int j = 2; j < lineSegmentBoxes.size; j++) {
 
                 // don't collide with self
-                if (collisionBoxes.get(i) == collisionBoxes.get(j))
+                if (lineSegmentBoxes.get(i) == lineSegmentBoxes.get(j))
                     continue;
 
                 // don't collide with neighbors
@@ -245,7 +252,7 @@ public class ShapeDrawer {
                     continue;
 
                 // collide with everything else
-                if (collisionBoxes.get(i).overlaps(collisionBoxes.get(j))) {
+                if (lineSegmentBoxes.get(i).overlaps(lineSegmentBoxes.get(j))) {
                     triangulate(getClosedShape(i, j));
 
                     // only check that closed shape once
@@ -358,7 +365,7 @@ public class ShapeDrawer {
         }
 
         collisionPolygon = new Polygon(points);
-        lastDrawnShapes.add(new Polygon(points));
+        lastDrawnPolygon.add(new Polygon(points));
 
         EarClippingTriangulator earClippingTriangulator = new EarClippingTriangulator();
         return earClippingTriangulator.computeTriangles(points);
@@ -374,7 +381,7 @@ public class ShapeDrawer {
                     closedShape.get(triangulatedTriangles.get(i + 2)).getOriginX(),
                     closedShape.get(triangulatedTriangles.get(i + 2)).getOriginY()
             });
-            trianglesToBeAdded.add(triangle);
+            lastDrawnTriangles.add(triangle);
         }
     }
 }
