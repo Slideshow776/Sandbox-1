@@ -160,7 +160,6 @@ public class LevelScreen extends BaseScreen {
                     isGettingFish = false;
                 });
                 ((Fish) fish).fadeAndRemove(removeFromList);
-                fishLabel.setText("{FASTER}Remaining fishes: " + (fishes.size - 1));
             }
         }
 
@@ -175,6 +174,9 @@ public class LevelScreen extends BaseScreen {
                             isGameOver = true;
                             pause();
                             System.out.println("level complete! You got " + (numLevelFishes - fishes.size) + " out of " + numLevelFishes + " fishes..");
+                        } else {
+                            fishLabel.restart();
+                            fishLabel.setText("{FASTER}Remaining fishes: " + fishes.size);
                         }
                     })
             ));
@@ -197,8 +199,8 @@ public class LevelScreen extends BaseScreen {
         isDrawing = false;
         speedometer.setZero();
         touchDownPoint.set(0, 0);
-        fishLabel.setText("Remaining fishes: " + fishes.size);
-        turnLabel.setText("Turns: " + ++numTurns);
+        turnLabel.restart();
+        turnLabel.setText("{FASTER}Turns: " + ++numTurns);
         cancelDrawing.addAction(Actions.alpha(.25f, 1f));
     }
 

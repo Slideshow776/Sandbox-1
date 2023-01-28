@@ -35,12 +35,6 @@ public class Player extends BaseActor {
         addActor(collisionBox);
     }
 
-    /*@Override
-    public void act(float delta) {
-        super.act(delta);
-        alignCamera(getX(), getY(), .1f);
-    }*/
-
     public void move(Array<Polyline> polylines, RunnableAction runnableAction) {
         isMoving = true;
         moveAlongPolylines(polylines);
