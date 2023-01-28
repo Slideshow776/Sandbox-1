@@ -19,17 +19,16 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthoCachedTiledMapRenderer;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import no.sandramoen.drawingGame.actors.Player;
 import no.sandramoen.drawingGame.utils.BaseGame;
 
-public class TilemapActor extends Actor {
+public class TiledMapActor extends Actor {
     public static float mapWidth;
     public static float mapHeight;
 
     private TiledMap tiledMap;
     private OrthoCachedTiledMapRenderer tiledMapRenderer;
 
-    public TilemapActor(TiledMap tiledMap, Stage stage) {
+    public TiledMapActor(TiledMap tiledMap, Stage stage) {
         this.tiledMap = tiledMap;
         tiledMapRenderer = new OrthoCachedTiledMapRenderer(this.tiledMap, BaseGame.UNIT_SCALE);
         tiledMapRenderer.setBlending(true);

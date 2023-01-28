@@ -30,6 +30,8 @@ public abstract class BaseGame extends Game implements AssetErrorListener {
     public static String shockwaveShader;
 
     public static TiledMap testMap;
+    public static TiledMap level1;
+    public static TiledMap level2;
 
     // public static Music menuMusic;
 
@@ -109,6 +111,8 @@ public abstract class BaseGame extends Game implements AssetErrorListener {
         // tiled maps
         assetManager.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
         assetManager.load("maps/test.tmx", TiledMap.class);
+        assetManager.load("maps/level1.tmx", TiledMap.class);
+        assetManager.load("maps/level2.tmx", TiledMap.class);
 
         assetManager.finishLoading();
 
@@ -124,6 +128,8 @@ public abstract class BaseGame extends Game implements AssetErrorListener {
 
         // tiled maps
         testMap = assetManager.get("maps/test.tmx", TiledMap.class);
+        level1 = assetManager.get("maps/level1.tmx", TiledMap.class);
+        level2 = assetManager.get("maps/level2.tmx", TiledMap.class);
 
         textureAtlas = assetManager.get("images/included/packed/images.pack.atlas");
         GameUtils.printLoadingTime(getClass().getSimpleName(),"Assetmanager", startTime);

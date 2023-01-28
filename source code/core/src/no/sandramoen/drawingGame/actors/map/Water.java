@@ -13,7 +13,7 @@ public class Water extends BaseActor {
 
     public Water(float x, float y, Stage stage) {
         super(x, y, stage);
-        setSize(TilemapActor.mapWidth, TilemapActor.mapHeight);
+        setSize(TiledMapActor.mapWidth, TiledMapActor.mapHeight);
 
         animationImages.add(BaseGame.textureAtlas.findRegion("water/waterTest0"));/*
         animationImages.add(BaseGame.textureAtlas.findRegion("water/waterTest1"));*/

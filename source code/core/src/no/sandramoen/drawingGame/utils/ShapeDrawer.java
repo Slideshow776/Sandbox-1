@@ -15,7 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ShortArray;
 
-import no.sandramoen.drawingGame.actors.map.TilemapActor;
+import no.sandramoen.drawingGame.actors.map.TiledMapActor;
 import no.sandramoen.drawingGame.actors.utils.Box;
 import no.sandramoen.drawingGame.actors.utils.BaseActor;
 
@@ -101,7 +101,7 @@ public class ShapeDrawer {
 
         /* Render masked elements. */
         spriteBatch.begin();
-        spriteBatch.draw(baseActor.animation.getKeyFrame(delta), 0, 0, TilemapActor.mapWidth, TilemapActor.mapHeight);
+        spriteBatch.draw(baseActor.animation.getKeyFrame(delta), 0, 0, TiledMapActor.mapWidth, TiledMapActor.mapHeight);
         spriteBatch.end();
         Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
     }

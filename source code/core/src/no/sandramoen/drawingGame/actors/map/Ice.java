@@ -8,6 +8,6 @@ public class Ice extends BaseActor {
     public Ice(float x, float y, Stage stage) {
         super(x, y, stage);
         loadImage("iceTest");
-        setSize(TilemapActor.mapWidth, TilemapActor.mapHeight);
+        setSize(TiledMapActor.mapWidth, TiledMapActor.mapHeight);
     }
 }

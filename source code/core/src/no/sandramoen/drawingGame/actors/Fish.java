@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 
 import no.sandramoen.drawingGame.actors.map.ImpassableTerrain;
-import no.sandramoen.drawingGame.actors.map.TilemapActor;
+import no.sandramoen.drawingGame.actors.map.TiledMapActor;
 import no.sandramoen.drawingGame.actors.utils.BaseActor;
 
 public class Fish extends BaseActor {
@@ -78,11 +78,11 @@ public class Fish extends BaseActor {
     }
 
     private void keepInsideScreen() {
-        if (getX() > TilemapActor.mapWidth)
+        if (getX() > TiledMapActor.mapWidth)
             addAction(Actions.rotateTo(180, 1f));
         else if (getX() < 0)
             addAction(Actions.rotateTo(0, 1f));
-        if (getY() > TilemapActor.mapHeight)
+        if (getY() > TiledMapActor.mapHeight)
             addAction(Actions.rotateTo(270, 1f));
         else if (getY() < 0)
             addAction(Actions.rotateTo(90, 1f));

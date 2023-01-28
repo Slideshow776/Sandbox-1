@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 
 import no.sandramoen.drawingGame.actors.map.ImpassableTerrain;
-import no.sandramoen.drawingGame.actors.map.TilemapActor;
 
 public class Gjedda extends Fish{
     public Gjedda(float x, float y, Stage stage, Array<ImpassableTerrain> impassables) {

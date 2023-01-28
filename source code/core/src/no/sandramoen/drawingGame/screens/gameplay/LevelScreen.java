@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -18,7 +19,7 @@ import no.sandramoen.drawingGame.actors.Gjedda;
 import no.sandramoen.drawingGame.actors.map.Ice;
 import no.sandramoen.drawingGame.actors.map.ImpassableTerrain;
 import no.sandramoen.drawingGame.actors.Player;
-import no.sandramoen.drawingGame.actors.map.TilemapActor;
+import no.sandramoen.drawingGame.actors.map.TiledMapActor;
 import no.sandramoen.drawingGame.actors.map.Water;
 import no.sandramoen.drawingGame.actors.utils.BaseActor;
 import no.sandramoen.drawingGame.ui.CancelDrawing;
@@ -55,25 +56,25 @@ public class LevelScreen extends BaseScreen {
     private StaminaBar staminaBar;
     private Speedometer speedometer;
 
-    private TilemapActor tilemap;
+    private TiledMapActor tilemap;
 
     private int numTurns;
     private float touchDraggedDistance;
     private Vector2 lastTouchDragged;
 
-    @Override
-    public void initialize() {
-        // system
+    public LevelScreen(TiledMap level1) {
         touchDownPoint = new Vector2();
         shapeDrawer = new ShapeDrawer(mainStage);
-        tilemap = new TilemapActor(BaseGame.testMap, mainStage);
-        System.out.println("\nrestart\n");
+        this.tilemap = new TiledMapActor(level1, mainStage);
         initializeActors();
 
         lastTouchDragged = new Vector2(player.getX(), player.getY());
 
-        // GUI
         initializeGUI();
+    }
+
+    @Override
+    public void initialize() {
     }
 
     @Override
@@ -147,7 +148,7 @@ public class LevelScreen extends BaseScreen {
         if (keycode == Keys.ESCAPE || keycode == Keys.Q)
             Gdx.app.exit();
         else if (keycode == Keys.R)
-            BaseGame.setActiveScreen(new LevelScreen());
+            BaseGame.setActiveScreen(new LevelScreen(BaseGame.level1));
         return super.keyDown(keycode);
     }
 
@@ -217,9 +218,9 @@ public class LevelScreen extends BaseScreen {
 
     private boolean isTouchOutOfBounds(Vector3 worldCoordinates) {
         if (
-                worldCoordinates.x > TilemapActor.mapWidth ||
+                worldCoordinates.x > TiledMapActor.mapWidth ||
                         worldCoordinates.x < 0 ||
-                        worldCoordinates.y > TilemapActor.mapHeight ||
+                        worldCoordinates.y > TiledMapActor.mapHeight ||
                         worldCoordinates.y < 0
         )
             return true;
@@ -239,7 +240,7 @@ public class LevelScreen extends BaseScreen {
             System.out.println("You fell in the water!");
         }
 
-        if (player.getCollisionBox().overlaps(gjedda) && !player.isDead) {
+        if (gjedda != null && player.getCollisionBox().overlaps(gjedda) && !player.isDead) {
             for (ImpassableTerrain impassableTerrain : impassables) {
                 if (player.overlaps(impassableTerrain))
                     return;
