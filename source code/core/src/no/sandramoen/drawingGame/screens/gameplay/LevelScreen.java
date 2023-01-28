@@ -22,6 +22,7 @@ import no.sandramoen.drawingGame.actors.Player;
 import no.sandramoen.drawingGame.actors.map.TiledMapActor;
 import no.sandramoen.drawingGame.actors.map.Water;
 import no.sandramoen.drawingGame.actors.utils.BaseActor;
+import no.sandramoen.drawingGame.screens.shell.LevelSelectScreen;
 import no.sandramoen.drawingGame.ui.CancelDrawing;
 import no.sandramoen.drawingGame.ui.Speedometer;
 import no.sandramoen.drawingGame.ui.StaminaBar;
@@ -39,6 +40,7 @@ public class LevelScreen extends BaseScreen {
     private Vector2 touchDownPoint;
     private final float MINIMUM_TOUCH_DISTANCE = 4f;
     private final float MAXIMUM_TOUCH_DRAG_SPEED = 4f;
+    private TiledMap currentMap;
 
     private ShapeDrawer shapeDrawer;
 
@@ -62,10 +64,13 @@ public class LevelScreen extends BaseScreen {
     private float touchDraggedDistance;
     private Vector2 lastTouchDragged;
 
-    public LevelScreen(TiledMap level1) {
+    public LevelScreen(TiledMap tiledMap) {
         touchDownPoint = new Vector2();
         shapeDrawer = new ShapeDrawer(mainStage);
-        this.tilemap = new TiledMapActor(level1, mainStage);
+
+        currentMap = tiledMap;
+        this.tilemap = new TiledMapActor(currentMap, mainStage);
+
         initializeActors();
 
         lastTouchDragged = new Vector2(player.getX(), player.getY());
@@ -148,7 +153,9 @@ public class LevelScreen extends BaseScreen {
         if (keycode == Keys.ESCAPE || keycode == Keys.Q)
             Gdx.app.exit();
         else if (keycode == Keys.R)
-            BaseGame.setActiveScreen(new LevelScreen(BaseGame.level1));
+            BaseGame.setActiveScreen(new LevelScreen(currentMap));
+        else if (keycode == Keys.T)
+            BaseGame.setActiveScreen(new LevelSelectScreen());
         return super.keyDown(keycode);
     }
 

@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.Array;
 
 import no.sandramoen.drawingGame.screens.BaseScreen;
 import no.sandramoen.drawingGame.screens.gameplay.LevelScreen;
@@ -24,11 +25,11 @@ public abstract class BaseGame extends Game implements AssetErrorListener {
     // game assets
     public static TextureAtlas textureAtlas;
     public static Skin mySkin;
-    public static LevelScreen levelScreen;
 
     public static String defaultShader;
     public static String shockwaveShader;
 
+    public static Array<TiledMap> maps;
     public static TiledMap testMap;
     public static TiledMap level1;
     public static TiledMap level2;
@@ -56,6 +57,11 @@ public abstract class BaseGame extends Game implements AssetErrorListener {
         loadGameState();
         UI();
         assetManager();
+
+        maps = new Array();
+        maps.add(testMap);
+        maps.add(level1);
+        maps.add(level2);
     }
 
     public static void setActiveScreen(BaseScreen screen) {
