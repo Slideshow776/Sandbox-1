@@ -4,13 +4,6 @@ size: 512, 256
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
-UI_cancel
-  rotate: false
-  xy: 82, 50
-  size: 33, 33
-  orig: 33, 33
-  offset: 0, 0
-  index: -1
 button
   rotate: false
   xy: 2, 5
@@ -54,6 +47,33 @@ actors/fish/gjedda
   index: -1
 
 images.pack3.png
+size: 256, 128
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+GUI/cancel
+  rotate: false
+  xy: 2, 2
+  size: 33, 33
+  orig: 33, 33
+  offset: 0, 0
+  index: -1
+GUI/next
+  rotate: false
+  xy: 2, 37
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+GUI/restart
+  rotate: false
+  xy: 68, 37
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+
+images.pack4.png
 size: 1024, 1024
 format: RGBA8888
 filter: Nearest, Nearest

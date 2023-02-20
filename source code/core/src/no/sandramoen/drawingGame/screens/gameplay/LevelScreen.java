@@ -24,6 +24,7 @@ import no.sandramoen.drawingGame.actors.map.Water;
 import no.sandramoen.drawingGame.actors.utils.BaseActor;
 import no.sandramoen.drawingGame.screens.shell.LevelSelectScreen;
 import no.sandramoen.drawingGame.ui.CancelDrawing;
+import no.sandramoen.drawingGame.ui.LevelOverlay;
 import no.sandramoen.drawingGame.ui.Speedometer;
 import no.sandramoen.drawingGame.ui.StaminaBar;
 import no.sandramoen.drawingGame.utils.BaseGame;
@@ -57,6 +58,7 @@ public class LevelScreen extends BaseScreen {
     private CancelDrawing cancelDrawing;
     private StaminaBar staminaBar;
     private Speedometer speedometer;
+    private LevelOverlay levelOverlay;
 
     private TiledMapActor tilemap;
 
@@ -276,9 +278,10 @@ public class LevelScreen extends BaseScreen {
     }
 
     private void initializeGUI() {
-        cancelDrawing = new CancelDrawing(Gdx.graphics.getWidth() * .1f, Gdx.graphics.getHeight() * .98f, uiStage);
-        staminaBar = new StaminaBar(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() * .98f, uiStage);
-        speedometer = new Speedometer(Gdx.graphics.getWidth() * .85f, Gdx.graphics.getHeight() * .98f, uiStage);
+        float verticalPadding = Gdx.graphics.getHeight() * .02f;
+        cancelDrawing = new CancelDrawing(Gdx.graphics.getWidth() * .1f, Gdx.graphics.getHeight() - verticalPadding, uiStage);
+        staminaBar = new StaminaBar(Gdx.graphics.getWidth() * .5f, Gdx.graphics.getHeight() - verticalPadding, uiStage);
+        speedometer = new Speedometer(Gdx.graphics.getWidth() * .85f, Gdx.graphics.getHeight() - verticalPadding, uiStage);
 
         fishLabel = new TypingLabel("{FASTER}Remaining fishes: " + fishes.size, new Label.LabelStyle(BaseGame.mySkin.get("arcade26", BitmapFont.class), null));
         fishLabel.setColor(Color.FOREST);
@@ -288,10 +291,13 @@ public class LevelScreen extends BaseScreen {
         turnLabel.setColor(Color.FOREST);
         turnLabel.setAlignment(Align.center);
 
-        uiTable.padTop(staminaBar.getHeight() + Gdx.graphics.getHeight() * .02f);
-        uiTable.defaults().padTop(Gdx.graphics.getHeight() * .02f);
+        levelOverlay = new LevelOverlay();
+
+        uiTable.padTop(staminaBar.getHeight() + verticalPadding);
+        uiTable.defaults().padTop(verticalPadding);
         uiTable.add(fishLabel).prefWidth(Gdx.graphics.getWidth()).row();
-        uiTable.add(turnLabel).prefWidth(Gdx.graphics.getWidth()).expandY().top();
-        /*uiTable.setDebug(true);*/
+        uiTable.add(turnLabel).prefWidth(Gdx.graphics.getWidth()).top().row();
+        uiTable.add(levelOverlay).expandY().padBottom(staminaBar.getHeight() + verticalPadding * 5 + fishLabel.getPrefHeight() + turnLabel.getPrefHeight());
+        uiTable.setDebug(true);
     }
 }

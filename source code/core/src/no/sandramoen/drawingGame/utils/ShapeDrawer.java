@@ -50,7 +50,7 @@ public class ShapeDrawer {
 
         shapeRenderer = new ShapeRenderer();
         shapeRenderer.setAutoShapeType(true);
-        Gdx.gl20.glLineWidth(2);
+        /*Gdx.gl20.glLineWidth(2);*/
         spriteBatch = new SpriteBatch();
     }
 

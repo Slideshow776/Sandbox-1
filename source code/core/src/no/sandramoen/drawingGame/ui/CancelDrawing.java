@@ -13,7 +13,7 @@ public class CancelDrawing extends BaseActor {
     public CancelDrawing(float x, float y, Stage stage) {
         super(x, y, stage);
 
-        loadImage("UI_cancel");
+        loadImage("GUI/cancel");
         setSize(100, 100);
         setPosition(x - getWidth() / 2, y - getHeight());
         setBoundaryRectangle();
